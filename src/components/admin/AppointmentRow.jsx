@@ -1,9 +1,11 @@
 import { fmtPrice } from '../../lib/money';
 import { fmtTime } from '../../lib/time';
+import { useSalon } from '../../context/SalonContext';
 
 const STATUS_LABEL = { confirmed: 'Onaylı', completed: 'Tamamlandı', cancelled: 'İptal', no_show: 'Gelmedi' };
 
 export default function AppointmentRow({ appt, onStatus }) {
+  const { locAdmin, adminLocale, currency } = useSalon();
   const svc = appt.salon_services;
   const staff = appt.salon_staff;
 
@@ -13,7 +15,7 @@ export default function AppointmentRow({ appt, onStatus }) {
       <div className="appt-info">
         <strong>{appt.customer_name}</strong>
         <span>
-          {svc ? svc.name : ''} {staff ? '· ' + staff.full_name : ''} {svc ? '· ' + fmtPrice(svc.price_cents) : ''}
+          {svc ? locAdmin(svc, 'name') : ''} {staff ? '· ' + staff.full_name : ''} {svc ? '· ' + fmtPrice(svc.price_cents, adminLocale, currency) : ''}
         </span>
         <span>{appt.customer_phone}{appt.notes ? ' · ' + appt.notes : ''}</span>
       </div>

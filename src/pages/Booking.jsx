@@ -1,23 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { bookAppointment, fetchSettings } from '../lib/api';
+import { bookAppointment } from '../lib/api';
 import { fmtDateLong, fmtTime } from '../lib/time';
+import { useSalon } from '../context/SalonContext';
 import SiteHeader from '../components/booking/SiteHeader';
+import LockedNotice from '../components/LockedNotice';
 import ServiceStep from '../components/booking/ServiceStep';
 import StaffStep from '../components/booking/StaffStep';
 import DateTimeStep from '../components/booking/DateTimeStep';
 import InfoStep from '../components/booking/InfoStep';
 import SummaryCard from '../components/booking/SummaryCard';
 
-const STEP_TITLES = [
-  { title: 'Hizmet seçin', hint: 'Almak istediğiniz hizmeti seçerek başlayın.' },
-  { title: 'Personel seçin', hint: 'Bu hizmeti verebilecek personeli seçin.' },
-  { title: 'Tarih ve saat seçin', hint: 'Size uygun günü ve saati seçin.' },
-  { title: 'Bilgilerinizi girin', hint: 'Randevunuzu onaylamak için iletişim bilgilerinizi girin.' },
-];
-
 export default function Booking() {
-  const [settings, setSettings] = useState(null);
+  const { settings, t, locked } = useSalon();
   const [step, setStep] = useState(0);
   const [service, setService] = useState(null);
   const [staffId, setStaffId] = useState(undefined);
@@ -30,12 +25,17 @@ export default function Booking() {
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(function () {
-    fetchSettings().then(setSettings).catch(function () {});
-  }, []);
-
   if (result) {
     return <SuccessScreen service={service} staffName={slot.staff_name} date={date} time={slot.slot_time} />;
+  }
+
+  if (locked) {
+    return (
+      <div className="app">
+        <SiteHeader showBookButton={false} />
+        <div className="section"><LockedNotice /></div>
+      </div>
+    );
   }
 
   const canNext =
@@ -80,17 +80,17 @@ export default function Booking() {
 
   return (
     <div className="app wizard">
-      <SiteHeader name={settings ? settings.name : ''} />
+      <SiteHeader showBookButton={false} />
 
       <div className="stepper">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className={'step-dot' + (i < step ? ' done' : i === step ? ' active' : '')} />
-        ))}
+        {[0, 1, 2, 3].map(function (i) {
+          return <div key={i} className={'step-dot' + (i < step ? ' done' : i === step ? ' active' : '')} />;
+        })}
       </div>
 
       <div className="step-head">
-        <h2>{STEP_TITLES[step].title}</h2>
-        <p>{STEP_TITLES[step].hint}</p>
+        <h2>{t('step' + (step + 1) + '.title')}</h2>
+        <p>{t('step' + (step + 1) + '.hint')}</p>
       </div>
 
       <div className="step-body">
@@ -146,9 +146,9 @@ export default function Booking() {
 
       <div className="wizard-foot">
         <div className="wizard-foot-inner">
-          <button className="btn btn-ghost" onClick={handleBack} disabled={submitting}>Geri</button>
+          <button className="btn btn-ghost" onClick={handleBack} disabled={submitting}>{t('common.back')}</button>
           <button className="btn btn-accent btn-block" onClick={handleNext} disabled={!canNext || submitting}>
-            {submitting ? 'Gönderiliyor...' : step === 3 ? 'Randevuyu Onayla' : 'Devam Et'}
+            {submitting ? t('book.submitting') : step === 3 ? t('book.submit') : t('common.continue')}
           </button>
         </div>
       </div>
@@ -157,18 +157,20 @@ export default function Booking() {
 }
 
 function SuccessScreen({ service, staffName, date, time }) {
+  const { t, loc, locale } = useSalon();
+
   return (
     <div className="confirm-screen">
       <div className="confirm-icon">✓</div>
-      <h1>Randevunuz alındı!</h1>
-      <p className="muted">Randevu detaylarınız aşağıdadır. Sizi salonumuzda görmekten mutluluk duyarız.</p>
+      <h1>{t('confirm.title')}</h1>
+      <p className="muted">{t('confirm.sub')}</p>
       <div className="confirm-card">
-        <div className="summary-row"><span>Hizmet</span><strong>{service.name}</strong></div>
-        {staffName && <div className="summary-row"><span>Personel</span><span>{staffName}</span></div>}
-        <div className="summary-row"><span>Tarih</span><span>{fmtDateLong(date)}</span></div>
-        <div className="summary-row"><span>Saat</span><span>{fmtTime(time)}</span></div>
+        <div className="summary-row"><span>{t('summary.service')}</span><strong>{loc(service, 'name')}</strong></div>
+        {staffName && <div className="summary-row"><span>{t('summary.staff')}</span><span>{staffName}</span></div>}
+        <div className="summary-row"><span>{t('summary.date')}</span><span>{fmtDateLong(date, locale)}</span></div>
+        <div className="summary-row"><span>{t('summary.time')}</span><span>{fmtTime(time)}</span></div>
       </div>
-      <Link to="/" className="btn btn-primary">Ana Sayfaya Dön</Link>
+      <Link to="/" className="btn btn-primary">{t('nav.home')}</Link>
     </div>
   );
 }

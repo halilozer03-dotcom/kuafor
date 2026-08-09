@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSalon } from '../../context/SalonContext';
+import BarberEmblem from '../BarberEmblem';
 
 const LINKS = [
   { to: '/admin', label: 'Panel', end: true },
@@ -12,6 +14,7 @@ const LINKS = [
 
 export default function AdminLayout() {
   const { signOut } = useAuth();
+  const { locked } = useSalon();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -30,7 +33,10 @@ export default function AdminLayout() {
       </div>
 
       <aside className="admin-sidebar" style={mobileOpen ? { display: 'flex', position: 'fixed', inset: 0, zIndex: 30, width: '100%' } : undefined}>
-        <div className="admin-brand">Yönetim Paneli</div>
+        <div className="admin-brand">
+          <span className="admin-brand-mark"><BarberEmblem /></span>
+          Yönetim Paneli
+        </div>
         {LINKS.map((l) => (
           <NavLink
             key={l.to}
@@ -48,6 +54,12 @@ export default function AdminLayout() {
       </aside>
 
       <main className="admin-main">
+        {locked && (
+          <div className="subscription-banner">
+            <strong>Online randevu kapalı.</strong> Müşteriler şu anda siteden randevu alamıyor.
+            Mevcut randevularınızı görmeye ve yönetmeye devam edebilirsiniz. Açtırmak için sistem sağlayıcınıza ulaşın.
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

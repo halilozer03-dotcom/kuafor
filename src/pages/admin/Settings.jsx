@@ -21,15 +21,20 @@ export default function Settings() {
     setBusy(true);
     setErr(null);
     try {
+      // subscription_active BİLEREK gönderilmiyor: hosting/lisans kilidi salonun
+      // kendi kontrolünde olmamalı. Veritabanında da trigger ile engelli.
       await updateSettings({
         name: form.name,
         slogan: form.slogan,
+        slogan_tr: form.slogan_tr,
         description: form.description,
+        description_tr: form.description_tr,
         address: form.address,
         phone: form.phone,
         email: form.email,
         instagram: form.instagram,
         opening_hours_note: form.opening_hours_note,
+        opening_hours_note_tr: form.opening_hours_note_tr,
         slot_interval_minutes: Number(form.slot_interval_minutes),
         booking_lead_minutes: Number(form.booking_lead_minutes),
         booking_horizon_days: Number(form.booking_horizon_days),
@@ -49,19 +54,35 @@ export default function Settings() {
     <div>
       <div className="admin-header"><h1>Ayarlar</h1></div>
 
-      <form className="card" style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 560 }} onSubmit={handleSubmit}>
+      <form className="card" style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 640 }} onSubmit={handleSubmit}>
+        <p className="muted" style={{ fontSize: '.85rem', margin: 0 }}>
+          Fransızca alanlar müşterinin gördüğü metindir. Türkçe alanlar sitede dil TR seçildiğinde gösterilir.
+        </p>
+
         <div className="field">
           <label>Salon Adı</label>
           <input value={form.name || ''} onChange={function (e) { set('name', e.target.value); }} />
         </div>
-        <div className="field">
-          <label>Slogan</label>
-          <input value={form.slogan || ''} onChange={function (e) { set('slogan', e.target.value); }} />
+
+        <div className="form-grid">
+          <div className="field">
+            <label>Slogan — Fransızca</label>
+            <input value={form.slogan || ''} onChange={function (e) { set('slogan', e.target.value); }} placeholder="Avec ou sans rendez-vous" />
+          </div>
+          <div className="field">
+            <label>Slogan — Türkçe</label>
+            <input value={form.slogan_tr || ''} onChange={function (e) { set('slogan_tr', e.target.value); }} placeholder="Randevulu veya randevusuz" />
+          </div>
+          <div className="field full">
+            <label>Açıklama — Fransızca</label>
+            <textarea value={form.description || ''} onChange={function (e) { set('description', e.target.value); }} />
+          </div>
+          <div className="field full">
+            <label>Açıklama — Türkçe</label>
+            <textarea value={form.description_tr || ''} onChange={function (e) { set('description_tr', e.target.value); }} />
+          </div>
         </div>
-        <div className="field">
-          <label>Açıklama</label>
-          <textarea value={form.description || ''} onChange={function (e) { set('description', e.target.value); }} />
-        </div>
+
         <div className="form-grid">
           <div className="field">
             <label>Adres</label>
@@ -69,7 +90,7 @@ export default function Settings() {
           </div>
           <div className="field">
             <label>Telefon</label>
-            <input value={form.phone || ''} onChange={function (e) { set('phone', e.target.value); }} />
+            <input value={form.phone || ''} onChange={function (e) { set('phone', e.target.value); }} placeholder="07 58 37 79 86" />
           </div>
           <div className="field">
             <label>E-posta</label>
@@ -79,9 +100,13 @@ export default function Settings() {
             <label>Instagram</label>
             <input value={form.instagram || ''} onChange={function (e) { set('instagram', e.target.value); }} />
           </div>
-          <div className="field full">
-            <label>Çalışma Saatleri Notu</label>
-            <input value={form.opening_hours_note || ''} onChange={function (e) { set('opening_hours_note', e.target.value); }} placeholder="Örn: Pazartesi - Cumartesi 09:00 - 19:00" />
+          <div className="field">
+            <label>Çalışma Saatleri Notu — Fransızca</label>
+            <input value={form.opening_hours_note || ''} onChange={function (e) { set('opening_hours_note', e.target.value); }} placeholder="Lundi - Samedi 09:00 - 19:00" />
+          </div>
+          <div className="field">
+            <label>Çalışma Saatleri Notu — Türkçe</label>
+            <input value={form.opening_hours_note_tr || ''} onChange={function (e) { set('opening_hours_note_tr', e.target.value); }} placeholder="Pazartesi - Cumartesi 09:00 - 19:00" />
           </div>
         </div>
 
@@ -104,6 +129,19 @@ export default function Settings() {
         {saved && <div style={{ color: 'var(--ok)', fontWeight: 600, fontSize: '.9rem' }}>Kaydedildi.</div>}
         <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? 'Kaydediliyor...' : 'Kaydet'}</button>
       </form>
+
+      <div className="card" style={{ maxWidth: 640, marginTop: 16 }}>
+        <h2 className="section-title" style={{ fontSize: '1rem', marginTop: 0 }}>Sistem</h2>
+        <div className="summary-row"><span>Saat dilimi</span><span>{form.timezone || '—'}</span></div>
+        <div className="summary-row"><span>Para birimi</span><span>{form.currency || '—'}</span></div>
+        <div className="summary-row">
+          <span>Online randevu</span>
+          <span>{form.subscription_active === false ? 'Kapalı' : 'Açık'}</span>
+        </div>
+        <p className="muted" style={{ fontSize: '.8rem', marginBottom: 0 }}>
+          Bu üç değer panelden değiştirilemez; sistem sağlayıcısı tarafından ayarlanır.
+        </p>
+      </div>
     </div>
   );
 }

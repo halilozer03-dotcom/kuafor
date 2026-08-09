@@ -1,13 +1,23 @@
 <!doctype html>
-<html lang="tr">
+<!--
+  KALIP NOTU: Bu dosya salona özeldir. Yeni bir kuaför için değişmesi gereken
+  tek statik dosya burasıdır (başlık, açıklama, tema rengi). Geri kalan her şey
+  salon_settings tablosundan gelir.
+
+  lang="fr": ilk boyamada Fransızca varsayılır; SalonProvider ziyaretçinin diline
+  göre bunu günceller.
+-->
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#1b1420" />
-    <title>Randevu Al — Kuaför Salonu</title>
-    <meta name="description" content="Kuaför salonunuzda online randevu alın: hizmet, personel ve size uygun saati seçin." />
+    <meta name="theme-color" content="#121214" />
+    <title>Prestige Barber — Prendre rendez-vous</title>
+    <meta name="description" content="Prenez rendez-vous en ligne chez Prestige Barber : choisissez votre prestation, votre barbier et votre créneau." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Playfair Display italic: tabeladaki "Prestige" logotype'ının akan italik karakterine en yakın ücretsiz eşleşme -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

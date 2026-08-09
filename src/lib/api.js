@@ -20,7 +20,7 @@ export async function fetchActiveServices() {
 export async function fetchStaffForService(serviceId) {
   const { data, error } = await supabase
     .from('salon_staff_services')
-    .select('staff_id, salon_staff(id, full_name, title, avatar_url, active, sort_order)')
+    .select('staff_id, salon_staff(id, full_name, title, title_tr, avatar_url, active, sort_order)')
     .eq('service_id', serviceId);
   if (error) throw error;
   return data
@@ -59,7 +59,7 @@ export async function bookAppointment({ serviceId, staffId, date, startTime, nam
 export async function fetchAppointments({ from, to, staffId, status } = {}) {
   let q = supabase
     .from('salon_appointments')
-    .select('*, salon_services(name, duration_minutes, price_cents), salon_staff(full_name)')
+    .select('*, salon_services(name, name_tr, duration_minutes, price_cents), salon_staff(full_name)')
     .order('appointment_date')
     .order('start_time');
   if (from) q = q.gte('appointment_date', from);
@@ -106,6 +106,13 @@ export async function upsertStaff(staff) {
 
 export async function deleteStaff(id) {
   const { error } = await supabase.from('salon_staff').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// "Mola" günlük kullanılan bir düğmedir: personeli silmeden/pasifleştirmeden
+// yalnızca BUGÜN için randevuya kapatır. Gelecek günler etkilenmez.
+export async function setStaffBreak(id, onBreak) {
+  const { error } = await supabase.from('salon_staff').update({ on_break: onBreak }).eq('id', id);
   if (error) throw error;
 }
 

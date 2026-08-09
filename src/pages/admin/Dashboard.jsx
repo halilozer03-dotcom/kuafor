@@ -3,8 +3,10 @@ import { fetchAppointments, updateAppointmentStatus } from '../../lib/api';
 import { fmtPrice } from '../../lib/money';
 import { fmtDateLong, fmtTime, nextDays, toISODate } from '../../lib/time';
 import AppointmentRow from '../../components/admin/AppointmentRow';
+import { useSalon } from '../../context/SalonContext';
 
 export default function Dashboard() {
+  const { adminLocale, currency } = useSalon();
   const [today, setToday] = useState(null);
   const [weekCount, setWeekCount] = useState(null);
   const [err, setErr] = useState(null);
@@ -36,13 +38,13 @@ export default function Dashboard() {
     <div>
       <div className="admin-header">
         <h1>Panel</h1>
-        <span className="muted">{fmtDateLong(todayDate)}</span>
+        <span className="muted">{fmtDateLong(todayDate, adminLocale)}</span>
       </div>
 
       <div className="stat-grid">
         <div className="stat-card"><div className="num">{activeToday.length}</div><div className="lbl">Bugünkü randevu</div></div>
         <div className="stat-card"><div className="num">{weekCount === null ? '—' : weekCount}</div><div className="lbl">Bu hafta</div></div>
-        <div className="stat-card"><div className="num">{fmtPrice(revenueToday)}</div><div className="lbl">Bugünkü tahmini ciro</div></div>
+        <div className="stat-card"><div className="num">{fmtPrice(revenueToday, adminLocale, currency)}</div><div className="lbl">Bugünkü tahmini ciro</div></div>
       </div>
 
       <h2 className="section-title" style={{ fontSize: '1.1rem', marginBottom: 12 }}>Bugünkü Randevular</h2>

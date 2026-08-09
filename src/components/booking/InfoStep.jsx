@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useSalon } from '../../context/SalonContext';
 
 export default function InfoStep({ value, onChange }) {
+  const { t } = useSalon();
   const [touched, setTouched] = useState(false);
   const nameErr = touched && !value.name.trim();
   const phoneErr = touched && !value.phone.trim();
@@ -12,22 +14,22 @@ export default function InfoStep({ value, onChange }) {
   return (
     <>
       <div className="field">
-        <label htmlFor="cname">Ad Soyad *</label>
-        <input id="cname" value={value.name} onChange={function (e) { set('name', e.target.value); }} onBlur={function () { setTouched(true); }} placeholder="Adınız Soyadınız" />
-        {nameErr && <span className="err-banner">Ad soyad gerekli</span>}
+        <label htmlFor="cname">{t('info.name')}</label>
+        <input id="cname" value={value.name} onChange={function (e) { set('name', e.target.value); }} onBlur={function () { setTouched(true); }} placeholder={t('info.namePh')} autoComplete="name" />
+        {nameErr && <span className="err-banner">{t('info.nameErr')}</span>}
       </div>
       <div className="field">
-        <label htmlFor="cphone">Telefon *</label>
-        <input id="cphone" value={value.phone} onChange={function (e) { set('phone', e.target.value); }} onBlur={function () { setTouched(true); }} placeholder="05xx xxx xx xx" inputMode="tel" />
-        {phoneErr && <span className="err-banner">Telefon numarası gerekli</span>}
+        <label htmlFor="cphone">{t('info.phone')}</label>
+        <input id="cphone" value={value.phone} onChange={function (e) { set('phone', e.target.value); }} onBlur={function () { setTouched(true); }} placeholder={t('info.phonePh')} inputMode="tel" autoComplete="tel" />
+        {phoneErr && <span className="err-banner">{t('info.phoneErr')}</span>}
       </div>
       <div className="field">
-        <label htmlFor="cemail">E-posta (opsiyonel)</label>
-        <input id="cemail" type="email" value={value.email} onChange={function (e) { set('email', e.target.value); }} placeholder="ornek@eposta.com" />
+        <label htmlFor="cemail">{t('info.email')}</label>
+        <input id="cemail" type="email" value={value.email} onChange={function (e) { set('email', e.target.value); }} placeholder={t('info.emailPh')} autoComplete="email" />
       </div>
       <div className="field">
-        <label htmlFor="cnotes">Not (opsiyonel)</label>
-        <textarea id="cnotes" value={value.notes} onChange={function (e) { set('notes', e.target.value); }} placeholder="Eklemek istediğiniz bir not var mı?" />
+        <label htmlFor="cnotes">{t('info.notes')}</label>
+        <textarea id="cnotes" value={value.notes} onChange={function (e) { set('notes', e.target.value); }} placeholder={t('info.notesPh')} />
       </div>
     </>
   );

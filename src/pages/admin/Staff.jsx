@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import {
   deleteStaff, fetchAllServices, fetchAllStaff, fetchStaffHours, fetchStaffServiceIds,
-  setStaffHours, setStaffServices, upsertStaff,
+  setStaffBreak, setStaffHours, setStaffServices, upsertStaff,
 } from '../../lib/api';
+import { useSalon } from '../../context/SalonContext';
 import Modal from '../../components/admin/Modal';
 import HoursEditor from '../../components/admin/HoursEditor';
 
-const EMPTY = { full_name: '', title: '', bio: '', active: true, sort_order: 0 };
+const EMPTY = { full_name: '', title: '', title_tr: '', bio: '', bio_tr: '', avatar_url: '', active: true, sort_order: 0 };
 
 export default function Staff() {
+  const { locAdmin } = useSalon();
   const [staff, setStaff] = useState(null);
   const [services, setServices] = useState([]);
   const [err, setErr] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [breakBusy, setBreakBusy] = useState(null);
 
   function reload() {
     fetchAllStaff().then(setStaff).catch(function (e) { setErr(e.message || String(e)); });
@@ -36,7 +39,17 @@ export default function Staff() {
       hoursByDay[h.weekday] = list;
     });
     setEditing({
-      base: { id: s.id, full_name: s.full_name, title: s.title || '', bio: s.bio || '', active: s.active, sort_order: s.sort_order },
+      base: {
+        id: s.id,
+        full_name: s.full_name,
+        title: s.title || '',
+        title_tr: s.title_tr || '',
+        bio: s.bio || '',
+        bio_tr: s.bio_tr || '',
+        avatar_url: s.avatar_url || '',
+        active: s.active,
+        sort_order: s.sort_order,
+      },
       serviceIds,
       hoursByDay,
     });
@@ -48,8 +61,27 @@ export default function Staff() {
     reload();
   }
 
+  async function toggleBreak(s) {
+    setBreakBusy(s.id);
+    try {
+      await setStaffBreak(s.id, !s.on_break);
+      reload();
+    } catch (e) {
+      setErr(e.message || String(e));
+    } finally {
+      setBreakBusy(null);
+    }
+  }
+
   async function handleSave(state) {
-    const saved = await upsertStaff(state.base);
+    const base = Object.assign({}, state.base, {
+      title: state.base.title.trim() || null,
+      title_tr: state.base.title_tr.trim() || null,
+      bio: state.base.bio.trim() || null,
+      bio_tr: state.base.bio_tr.trim() || null,
+      avatar_url: state.base.avatar_url.trim() || null,
+    });
+    const saved = await upsertStaff(base);
     await setStaffServices(saved.id, state.serviceIds);
     const flatHours = [];
     Object.entries(state.hoursByDay).forEach(function ([weekday, ranges]) {
@@ -69,6 +101,10 @@ export default function Staff() {
         <button className="btn btn-accent" onClick={openNew}>+ Yeni Personel</button>
       </div>
 
+      <p className="muted" style={{ fontSize: '.85rem', marginTop: -4 }}>
+        “Molada” yalnızca bugünü kapatır — yarın otomatik açılır. Kalıcı olarak kapatmak için “Pasif” yap.
+      </p>
+
       {err && <div className="err-banner">{err}</div>}
       {!staff && !err && <p className="muted">Yükleniyor...</p>}
       {staff && staff.length === 0 && <div className="list-empty">Henüz personel eklenmedi.</div>}
@@ -76,13 +112,23 @@ export default function Staff() {
         return (
           <div key={s.id} className="entity-row">
             <div className="entity-main">
-              <span className="staff-avatar">{s.full_name.charAt(0).toUpperCase()}</span>
+              <span className="staff-avatar">
+                {s.avatar_url ? <img src={s.avatar_url} alt="" /> : s.full_name.charAt(0).toUpperCase()}
+              </span>
               <div>
                 <div className="entity-title">{s.full_name}</div>
-                <div className="entity-sub">{s.title || '—'}</div>
+                <div className="entity-sub">{locAdmin(s, 'title') || '—'}</div>
               </div>
             </div>
             <div className="entity-actions">
+              <button
+                className={'pill-toggle pill-btn ' + (s.on_break ? 'onbreak' : 'working')}
+                disabled={breakBusy === s.id}
+                onClick={function () { toggleBreak(s); }}
+                title="Bugün için randevuya kapat/aç"
+              >
+                {s.on_break ? '⏸ Molada' : '● Çalışıyor'}
+              </button>
               <span className={'pill-toggle ' + (s.active ? 'active' : 'inactive')}>{s.active ? 'Aktif' : 'Pasif'}</span>
               <button className="btn btn-ghost btn-sm" onClick={function () { openEdit(s); }}>Düzenle</button>
               <button className="btn btn-danger btn-sm" onClick={function () { handleDelete(s.id); }}>Sil</button>
@@ -101,6 +147,7 @@ export default function Staff() {
 }
 
 function StaffForm({ value, services, onSave, onCancel }) {
+  const { locAdmin } = useSalon();
   const [base, setBase] = useState(value.base);
   const [serviceIds, setServiceIds] = useState(value.serviceIds);
   const [hoursByDay, setHoursByDay] = useState(value.hoursByDay);
@@ -124,17 +171,39 @@ function StaffForm({ value, services, onSave, onCancel }) {
   return (
     <form className="modal-form" onSubmit={handleSubmit}>
       <div className="form-grid">
-        <div className="field">
+        <div className="field full">
           <label>Ad Soyad *</label>
           <input required value={base.full_name} onChange={function (e) { set('full_name', e.target.value); }} />
         </div>
+        <div className="field full">
+          <label>Fotoğraf — URL</label>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span className="staff-avatar" style={{ flexShrink: 0 }}>
+              {base.avatar_url ? <img src={base.avatar_url} alt="" /> : (base.full_name || '?').charAt(0).toUpperCase()}
+            </span>
+            <input
+              style={{ flex: 1 }}
+              value={base.avatar_url}
+              onChange={function (e) { set('avatar_url', e.target.value); }}
+              placeholder="https://…jpg"
+            />
+          </div>
+        </div>
         <div className="field">
-          <label>Ünvan</label>
-          <input value={base.title} onChange={function (e) { set('title', e.target.value); }} placeholder="Örn: Kuaför" />
+          <label>Ünvan — Fransızca</label>
+          <input value={base.title} onChange={function (e) { set('title', e.target.value); }} placeholder="Barbier" />
+        </div>
+        <div className="field">
+          <label>Ünvan — Türkçe</label>
+          <input value={base.title_tr} onChange={function (e) { set('title_tr', e.target.value); }} placeholder="Berber" />
         </div>
         <div className="field full">
-          <label>Biyografi</label>
+          <label>Biyografi — Fransızca</label>
           <textarea value={base.bio} onChange={function (e) { set('bio', e.target.value); }} />
+        </div>
+        <div className="field full">
+          <label>Biyografi — Türkçe</label>
+          <textarea value={base.bio_tr} onChange={function (e) { set('bio_tr', e.target.value); }} />
         </div>
       </div>
       <label className="checkbox-row">
@@ -154,7 +223,7 @@ function StaffForm({ value, services, onSave, onCancel }) {
                 style={{ padding: '8px 12px', width: 'auto' }}
                 onClick={function () { toggleService(s.id); }}
               >
-                {s.name}
+                {locAdmin(s, 'name')}
               </button>
             );
           })}

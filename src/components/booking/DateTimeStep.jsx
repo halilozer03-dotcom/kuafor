@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fetchSlots } from '../../lib/api';
 import { fmtDayChip, fmtTime, isSameDate, nextDays } from '../../lib/time';
+import { useSalon } from '../../context/SalonContext';
 
 export default function DateTimeStep({ serviceId, staffId, horizonDays, selectedDate, selectedSlot, onPickDate, onPickSlot }) {
+  const { t, locale } = useSalon();
   const days = nextDays(horizonDays || 21);
   const [slots, setSlots] = useState(null);
   const [err, setErr] = useState(null);
@@ -20,8 +22,8 @@ export default function DateTimeStep({ serviceId, staffId, horizonDays, selected
   return (
     <>
       <div className="day-scroll">
-        {days.map((d) => {
-          const chip = fmtDayChip(d);
+        {days.map(function (d) {
+          const chip = fmtDayChip(d, locale);
           const on = isSameDate(d, selectedDate);
           return (
             <button key={d.toISOString()} type="button" className={'day-chip' + (on ? ' on' : '')} onClick={function () { onPickDate(d); }}>
@@ -33,11 +35,11 @@ export default function DateTimeStep({ serviceId, staffId, horizonDays, selected
       </div>
 
       {err && <div className="err-banner">{err}</div>}
-      {!err && !slots && <p className="muted" style={{ padding: '0 20px' }}>Uygun saatler yükleniyor...</p>}
-      {slots && slots.length === 0 && <div className="slot-empty">Bu tarihte uygun saat yok. Başka bir gün deneyin.</div>}
+      {!err && !slots && <p className="muted" style={{ padding: '0 20px' }}>{t('slots.loading')}</p>}
+      {slots && slots.length === 0 && <div className="slot-empty">{t('slots.empty')}</div>}
       {slots && slots.length > 0 && (
         <div className="slot-grid">
-          {slots.map((s) => {
+          {slots.map(function (s) {
             const on = selectedSlot && selectedSlot.slot_time === s.slot_time && selectedSlot.staff_id === s.staff_id;
             return (
               <button

@@ -18,7 +18,10 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/randevu-al" element={<Booking />} />
+      {/* Müşteri tarafı Fransızca olduğu için kanonik adres /rendez-vous.
+          /randevu-al eski bağlantılar bozulmasın diye yönlendirme olarak duruyor. */}
+      <Route path="/rendez-vous" element={<Booking />} />
+      <Route path="/randevu-al" element={<Navigate to="/rendez-vous" replace />} />
       <Route path="/admin/giris" element={<AdminLogin />} />
       <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
         <Route index element={<Dashboard />} />

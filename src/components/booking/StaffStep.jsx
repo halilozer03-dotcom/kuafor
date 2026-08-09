@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { fetchStaffForService } from '../../lib/api';
+import { useSalon } from '../../context/SalonContext';
 
 export default function StaffStep({ serviceId, selectedId, onSelect, onAutoSkip }) {
+  const { t, loc } = useSalon();
   const [staff, setStaff] = useState(null);
   const [err, setErr] = useState(null);
 
@@ -16,8 +18,8 @@ export default function StaffStep({ serviceId, selectedId, onSelect, onAutoSkip 
   }, [serviceId]);
 
   if (err) return <div className="err-banner">{err}</div>;
-  if (!staff) return <p className="muted">Yükleniyor...</p>;
-  if (staff.length === 0) return <p className="muted">Bu hizmeti verebilecek personel bulunamadı.</p>;
+  if (!staff) return <p className="muted">{t('common.loading')}</p>;
+  if (staff.length === 0) return <p className="muted">{t('staff.none')}</p>;
 
   return (
     <div className="staff-list">
@@ -29,27 +31,29 @@ export default function StaffStep({ serviceId, selectedId, onSelect, onAutoSkip 
         >
           <span className="staff-avatar">?</span>
           <div className="staff-info">
-            <h3>Farketmez</h3>
-            <p>İlk uygun personel</p>
+            <h3>{t('staff.any')}</h3>
+            <p>{t('staff.anyHint')}</p>
           </div>
         </button>
       )}
-      {staff.map((s) => (
-        <button
-          key={s.id}
-          type="button"
-          className={'staff-card' + (selectedId === s.id ? ' on' : '')}
-          onClick={function () { onSelect(s.id, s.full_name); }}
-        >
-          <span className="staff-avatar">
-            {s.avatar_url ? <img src={s.avatar_url} alt="" /> : s.full_name.charAt(0).toUpperCase()}
-          </span>
-          <div className="staff-info">
-            <h3>{s.full_name}</h3>
-            {s.title && <p>{s.title}</p>}
-          </div>
-        </button>
-      ))}
+      {staff.map(function (s) {
+        return (
+          <button
+            key={s.id}
+            type="button"
+            className={'staff-card' + (selectedId === s.id ? ' on' : '')}
+            onClick={function () { onSelect(s.id, s.full_name); }}
+          >
+            <span className="staff-avatar">
+              {s.avatar_url ? <img src={s.avatar_url} alt="" /> : s.full_name.charAt(0).toUpperCase()}
+            </span>
+            <div className="staff-info">
+              <h3>{s.full_name}</h3>
+              {loc(s, 'title') && <p>{loc(s, 'title')}</p>}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

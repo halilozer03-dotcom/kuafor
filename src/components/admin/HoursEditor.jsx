@@ -1,9 +1,13 @@
-import { WEEKDAY_NAMES } from '../../lib/time';
+import { weekdayNames } from '../../lib/time';
+import { useSalon } from '../../context/SalonContext';
 
 // Postgres extract(dow) sırası: 0=Pazar..6=Cumartesi. Görünümde Pazartesi'den başlatıyoruz.
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export default function HoursEditor({ hoursByDay, onChange }) {
+  const { adminLocale } = useSalon();
+  const dayNames = weekdayNames(adminLocale);
+
   function updateDay(weekday, ranges) {
     onChange(Object.assign({}, hoursByDay, { [weekday]: ranges }));
   }
@@ -29,7 +33,7 @@ export default function HoursEditor({ hoursByDay, onChange }) {
         const ranges = hoursByDay[weekday] || [];
         return (
           <div key={weekday} className="hours-day">
-            <div className="day-name">{WEEKDAY_NAMES[weekday]}</div>
+            <div className="day-name">{dayNames[weekday]}</div>
             <div className="hours-day-slots">
               {ranges.length === 0 && <span className="muted" style={{ fontSize: '.82rem' }}>Kapalı</span>}
               {ranges.map(function (r, idx) {
