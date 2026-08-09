@@ -35,19 +35,19 @@ export default function HoursEditor({ hoursByDay, onChange }) {
           <div key={weekday} className="hours-day">
             <div className="day-name">{dayNames[weekday]}</div>
             <div className="hours-day-slots">
-              {ranges.length === 0 && <span className="muted" style={{ fontSize: '.82rem' }}>Kapalı</span>}
+              {ranges.length === 0 && <span className="muted" style={{ fontSize: '.82rem' }}>Fermé</span>}
               {ranges.map(function (r, idx) {
                 return (
                   <div key={idx} className="hours-slot-row">
                     <input className="input" type="time" value={r.start} onChange={function (e) { setRange(weekday, idx, 'start', e.target.value); }} />
                     <span className="muted">-</span>
                     <input className="input" type="time" value={r.end} onChange={function (e) { setRange(weekday, idx, 'end', e.target.value); }} />
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={function () { removeRange(weekday, idx); }}>Kaldır</button>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={function () { removeRange(weekday, idx); }}>Retirer</button>
                   </div>
                 );
               })}
               <button type="button" className="link-btn" style={{ textAlign: 'left', fontSize: '.82rem' }} onClick={function () { addRange(weekday); }}>
-                + Saat aralığı ekle
+                + Ajouter un créneau
               </button>
             </div>
           </div>

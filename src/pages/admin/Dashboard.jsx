@@ -37,20 +37,20 @@ export default function Dashboard() {
   return (
     <div>
       <div className="admin-header">
-        <h1>Panel</h1>
+        <h1>Tableau de bord</h1>
         <span className="muted">{fmtDateLong(todayDate, adminLocale)}</span>
       </div>
 
       <div className="stat-grid">
-        <div className="stat-card"><div className="num">{activeToday.length}</div><div className="lbl">Bugünkü randevu</div></div>
-        <div className="stat-card"><div className="num">{weekCount === null ? '—' : weekCount}</div><div className="lbl">Bu hafta</div></div>
-        <div className="stat-card"><div className="num">{fmtPrice(revenueToday, adminLocale, currency)}</div><div className="lbl">Bugünkü tahmini ciro</div></div>
+        <div className="stat-card"><div className="num">{activeToday.length}</div><div className="lbl">Rendez-vous aujourd'hui</div></div>
+        <div className="stat-card"><div className="num">{weekCount === null ? '—' : weekCount}</div><div className="lbl">Cette semaine</div></div>
+        <div className="stat-card"><div className="num">{fmtPrice(revenueToday, adminLocale, currency)}</div><div className="lbl">Chiffre d'affaires estimé du jour</div></div>
       </div>
 
-      <h2 className="section-title" style={{ fontSize: '1.1rem', marginBottom: 12 }}>Bugünkü Randevular</h2>
+      <h2 className="section-title" style={{ fontSize: '1.1rem', marginBottom: 12 }}>Rendez-vous du jour</h2>
       {err && <div className="err-banner">{err}</div>}
-      {!today && !err && <p className="muted">Yükleniyor...</p>}
-      {today && activeToday.length === 0 && <div className="list-empty">Bugün için randevu yok.</div>}
+      {!today && !err && <p className="muted">Chargement...</p>}
+      {today && activeToday.length === 0 && <div className="list-empty">Aucun rendez-vous aujourd'hui.</div>}
       {activeToday.map(function (a) {
         return <AppointmentRow key={a.id} appt={a} onStatus={handleStatus} />;
       })}

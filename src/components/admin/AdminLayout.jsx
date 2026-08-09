@@ -5,11 +5,11 @@ import { useSalon } from '../../context/SalonContext';
 import BarberEmblem from '../BarberEmblem';
 
 const LINKS = [
-  { to: '/admin', label: 'Panel', end: true },
-  { to: '/admin/randevular', label: 'Randevular' },
-  { to: '/admin/hizmetler', label: 'Hizmetler' },
-  { to: '/admin/personel', label: 'Personel' },
-  { to: '/admin/ayarlar', label: 'Ayarlar' },
+  { to: '/admin', label: 'Tableau de bord', end: true },
+  { to: '/admin/randevular', label: 'Rendez-vous' },
+  { to: '/admin/hizmetler', label: 'Prestations' },
+  { to: '/admin/personel', label: 'Personnel' },
+  { to: '/admin/ayarlar', label: 'Paramètres' },
 ];
 
 export default function AdminLayout() {
@@ -26,16 +26,16 @@ export default function AdminLayout() {
   return (
     <div className="admin-shell">
       <div className="admin-mobile-bar">
-        <strong>Yönetim Paneli</strong>
+        <strong>Espace admin</strong>
         <button className="btn btn-ghost btn-sm" style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,.3)' }} onClick={function () { setMobileOpen(!mobileOpen); }}>
-          {mobileOpen ? 'Kapat' : 'Menü'}
+          {mobileOpen ? 'Fermer' : 'Menu'}
         </button>
       </div>
 
       <aside className="admin-sidebar" style={mobileOpen ? { display: 'flex', position: 'fixed', inset: 0, zIndex: 30, width: '100%' } : undefined}>
         <div className="admin-brand">
           <span className="admin-brand-mark"><BarberEmblem /></span>
-          Yönetim Paneli
+          Espace admin
         </div>
         {LINKS.map((l) => (
           <NavLink
@@ -49,15 +49,15 @@ export default function AdminLayout() {
           </NavLink>
         ))}
         <div className="admin-sidebar-foot">
-          <button className="admin-nav-link" onClick={handleSignOut}>Çıkış Yap</button>
+          <button className="admin-nav-link" onClick={handleSignOut}>Déconnexion</button>
         </div>
       </aside>
 
       <main className="admin-main">
         {locked && (
           <div className="subscription-banner">
-            <strong>Online randevu kapalı.</strong> Müşteriler şu anda siteden randevu alamıyor.
-            Mevcut randevularınızı görmeye ve yönetmeye devam edebilirsiniz. Açtırmak için sistem sağlayıcınıza ulaşın.
+            <strong>Réservation en ligne fermée.</strong> Les clients ne peuvent pas prendre rendez-vous en ligne pour le moment.
+            Vous pouvez continuer à consulter et gérer vos rendez-vous existants. Contactez votre prestataire pour la réactiver.
           </div>
         )}
         <Outlet />

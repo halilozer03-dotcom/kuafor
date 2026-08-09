@@ -17,7 +17,7 @@ import { availableSlots, lockIds, toHHMM, toMinutes } from './slots';
 
 export async function fetchSettings() {
   const snap = await getDoc(doc(db, 'settings', 'main'));
-  if (!snap.exists()) throw new Error('Ayarlar bulunamadı');
+  if (!snap.exists()) throw new Error('Paramètres introuvables');
   return { id: snap.id, ...snap.data() };
 }
 

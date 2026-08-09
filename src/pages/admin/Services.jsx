@@ -42,7 +42,7 @@ export default function Services() {
   }
 
   async function handleDelete(id) {
-    if (!confirm('Bu hizmeti silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Voulez-vous vraiment supprimer cette prestation ?')) return;
     await deleteService(id);
     reload();
   }
@@ -68,13 +68,13 @@ export default function Services() {
   return (
     <div>
       <div className="admin-header">
-        <h1>Hizmetler</h1>
-        <button className="btn btn-accent" onClick={openNew}>+ Yeni Hizmet</button>
+        <h1>Prestations</h1>
+        <button className="btn btn-accent" onClick={openNew}>+ Nouvelle prestation</button>
       </div>
 
       {err && <div className="err-banner">{err}</div>}
-      {!services && !err && <p className="muted">Yükleniyor...</p>}
-      {services && services.length === 0 && <div className="list-empty">Henüz hizmet eklenmedi.</div>}
+      {!services && !err && <p className="muted">Chargement...</p>}
+      {services && services.length === 0 && <div className="list-empty">Aucune prestation pour le moment.</div>}
       {services && services.map(function (s) {
         return (
           <div key={s.id} className="entity-row">
@@ -84,21 +84,20 @@ export default function Services() {
                 <div className="entity-sub">
                   {locAdmin(s, 'category') ? locAdmin(s, 'category') + ' · ' : ''}
                   {durationLabel(s.duration_minutes, tAdmin)} · {fmtPrice(s.price_cents, adminLocale, currency)}
-                  {s.name_tr ? ' · ' + s.name : ''}
                 </div>
               </div>
             </div>
             <div className="entity-actions">
-              <span className={'pill-toggle ' + (s.active ? 'active' : 'inactive')}>{s.active ? 'Aktif' : 'Pasif'}</span>
-              <button className="btn btn-ghost btn-sm" onClick={function () { openEdit(s); }}>Düzenle</button>
-              <button className="btn btn-danger btn-sm" onClick={function () { handleDelete(s.id); }}>Sil</button>
+              <span className={'pill-toggle ' + (s.active ? 'active' : 'inactive')}>{s.active ? 'Actif' : 'Inactif'}</span>
+              <button className="btn btn-ghost btn-sm" onClick={function () { openEdit(s); }}>Modifier</button>
+              <button className="btn btn-danger btn-sm" onClick={function () { handleDelete(s.id); }}>Supprimer</button>
             </div>
           </div>
         );
       })}
 
       {editing && (
-        <Modal title={editing.id ? 'Hizmeti Düzenle' : 'Yeni Hizmet'} onClose={function () { setEditing(null); }}>
+        <Modal title={editing.id ? 'Modifier la prestation' : 'Nouvelle prestation'} onClose={function () { setEditing(null); }}>
           <ServiceForm value={editing} currency={currency} onSave={handleSave} onCancel={function () { setEditing(null); }} />
         </Modal>
       )}
@@ -109,7 +108,7 @@ export default function Services() {
 function ServiceForm({ value, currency, onSave, onCancel }) {
   const [form, setForm] = useState(value);
   const [busy, setBusy] = useState(false);
-  const symbol = currencySymbol(currency, 'tr-TR');
+  const symbol = currencySymbol(currency, 'fr-FR');
 
   function set(field, v) { setForm(Object.assign({}, form, { [field]: v })); }
 
@@ -125,57 +124,40 @@ function ServiceForm({ value, currency, onSave, onCancel }) {
 
   return (
     <form className="modal-form" onSubmit={handleSubmit}>
-      <p className="muted" style={{ fontSize: '.85rem', margin: 0 }}>
-        Fransızca alanlar müşterinin gördüğü metindir. Türkçe alanlar yalnızca bu panelde görünür;
-        boş bırakırsan panelde de Fransızcası gösterilir.
-      </p>
-
       <div className="form-grid">
         <div className="field">
-          <label>Hizmet Adı — Fransızca *</label>
+          <label>Nom de la prestation *</label>
           <input required value={form.name} onChange={function (e) { set('name', e.target.value); }} placeholder="Coupe + barbe" />
         </div>
         <div className="field">
-          <label>Hizmet Adı — Türkçe</label>
-          <input value={form.name_tr} onChange={function (e) { set('name_tr', e.target.value); }} placeholder="Kesim + sakal" />
-        </div>
-        <div className="field">
-          <label>Kategori — Fransızca</label>
+          <label>Catégorie</label>
           <input value={form.category} onChange={function (e) { set('category', e.target.value); }} placeholder="Forfait" />
         </div>
         <div className="field">
-          <label>Kategori — Türkçe</label>
-          <input value={form.category_tr} onChange={function (e) { set('category_tr', e.target.value); }} placeholder="Paket" />
-        </div>
-        <div className="field">
-          <label>Süre (dk) *</label>
+          <label>Durée (min) *</label>
           <input required type="number" min="5" step="5" value={form.duration_minutes} onChange={function (e) { set('duration_minutes', e.target.value); }} />
         </div>
         <div className="field">
-          <label>Fiyat ({symbol}) *</label>
+          <label>Prix ({symbol}) *</label>
           <input required inputMode="decimal" value={form.price} onChange={function (e) { set('price', e.target.value); }} placeholder="25" />
         </div>
         <div className="field">
-          <label>Sıra</label>
+          <label>Ordre d'affichage</label>
           <input type="number" value={form.sort_order} onChange={function (e) { set('sort_order', e.target.value); }} />
         </div>
         <div className="field full">
-          <label>Açıklama — Fransızca</label>
+          <label>Description</label>
           <textarea value={form.description} onChange={function (e) { set('description', e.target.value); }} />
-        </div>
-        <div className="field full">
-          <label>Açıklama — Türkçe</label>
-          <textarea value={form.description_tr} onChange={function (e) { set('description_tr', e.target.value); }} />
         </div>
       </div>
 
       <label className="checkbox-row">
         <input type="checkbox" checked={form.active} onChange={function (e) { set('active', e.target.checked); }} />
-        Müşterilere görünsün (aktif)
+        Visible pour les clients (actif)
       </label>
       <div className="modal-actions">
-        <button type="button" className="btn btn-ghost" onClick={onCancel}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary btn-block" disabled={busy}>{busy ? 'Kaydediliyor...' : 'Kaydet'}</button>
+        <button type="button" className="btn btn-ghost" onClick={onCancel}>Annuler</button>
+        <button type="submit" className="btn btn-primary btn-block" disabled={busy}>{busy ? 'Enregistrement...' : 'Enregistrer'}</button>
       </div>
     </form>
   );

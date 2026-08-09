@@ -56,7 +56,7 @@ export default function Staff() {
   }
 
   async function handleDelete(id) {
-    if (!confirm('Bu personeli silmek istediğinize emin misiniz? Geçmiş randevuları etkilemez.')) return;
+    if (!confirm('Voulez-vous vraiment supprimer ce membre du personnel ? Les rendez-vous passés ne sont pas affectés.')) return;
     await deleteStaff(id);
     reload();
   }
@@ -97,17 +97,17 @@ export default function Staff() {
   return (
     <div>
       <div className="admin-header">
-        <h1>Personel</h1>
-        <button className="btn btn-accent" onClick={openNew}>+ Yeni Personel</button>
+        <h1>Personnel</h1>
+        <button className="btn btn-accent" onClick={openNew}>+ Nouveau membre</button>
       </div>
 
       <p className="muted" style={{ fontSize: '.85rem', marginTop: -4 }}>
-        “Molada” yalnızca bugünü kapatır — yarın otomatik açılır. Kalıcı olarak kapatmak için “Pasif” yap.
+        « En pause » ferme uniquement aujourd'hui — ça se rouvre automatiquement demain. Pour fermer définitivement, passez en « Inactif ».
       </p>
 
       {err && <div className="err-banner">{err}</div>}
-      {!staff && !err && <p className="muted">Yükleniyor...</p>}
-      {staff && staff.length === 0 && <div className="list-empty">Henüz personel eklenmedi.</div>}
+      {!staff && !err && <p className="muted">Chargement...</p>}
+      {staff && staff.length === 0 && <div className="list-empty">Aucun membre du personnel pour le moment.</div>}
       {staff && staff.map(function (s) {
         return (
           <div key={s.id} className="entity-row">
@@ -125,20 +125,20 @@ export default function Staff() {
                 className={'pill-toggle pill-btn ' + (s.on_break ? 'onbreak' : 'working')}
                 disabled={breakBusy === s.id}
                 onClick={function () { toggleBreak(s); }}
-                title="Bugün için randevuya kapat/aç"
+                title="Fermer/rouvrir les rendez-vous pour aujourd'hui"
               >
-                {s.on_break ? '⏸ Molada' : '● Çalışıyor'}
+                {s.on_break ? '⏸ En pause' : '● Disponible'}
               </button>
-              <span className={'pill-toggle ' + (s.active ? 'active' : 'inactive')}>{s.active ? 'Aktif' : 'Pasif'}</span>
-              <button className="btn btn-ghost btn-sm" onClick={function () { openEdit(s); }}>Düzenle</button>
-              <button className="btn btn-danger btn-sm" onClick={function () { handleDelete(s.id); }}>Sil</button>
+              <span className={'pill-toggle ' + (s.active ? 'active' : 'inactive')}>{s.active ? 'Actif' : 'Inactif'}</span>
+              <button className="btn btn-ghost btn-sm" onClick={function () { openEdit(s); }}>Modifier</button>
+              <button className="btn btn-danger btn-sm" onClick={function () { handleDelete(s.id); }}>Supprimer</button>
             </div>
           </div>
         );
       })}
 
       {editing && (
-        <Modal title={editing.base.id ? 'Personeli Düzenle' : 'Yeni Personel'} onClose={function () { setEditing(null); }}>
+        <Modal title={editing.base.id ? 'Modifier le membre' : 'Nouveau membre'} onClose={function () { setEditing(null); }}>
           <StaffForm value={editing} services={services} onSave={handleSave} onCancel={function () { setEditing(null); }} />
         </Modal>
       )}
@@ -172,11 +172,11 @@ function StaffForm({ value, services, onSave, onCancel }) {
     <form className="modal-form" onSubmit={handleSubmit}>
       <div className="form-grid">
         <div className="field full">
-          <label>Ad Soyad *</label>
+          <label>Nom et prénom *</label>
           <input required value={base.full_name} onChange={function (e) { set('full_name', e.target.value); }} />
         </div>
         <div className="field full">
-          <label>Fotoğraf — URL</label>
+          <label>Photo — URL</label>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <span className="staff-avatar" style={{ flexShrink: 0 }}>
               {base.avatar_url ? <img src={base.avatar_url} alt="" /> : (base.full_name || '?').charAt(0).toUpperCase()}
@@ -190,29 +190,21 @@ function StaffForm({ value, services, onSave, onCancel }) {
           </div>
         </div>
         <div className="field">
-          <label>Ünvan — Fransızca</label>
+          <label>Titre</label>
           <input value={base.title} onChange={function (e) { set('title', e.target.value); }} placeholder="Barbier" />
         </div>
-        <div className="field">
-          <label>Ünvan — Türkçe</label>
-          <input value={base.title_tr} onChange={function (e) { set('title_tr', e.target.value); }} placeholder="Berber" />
-        </div>
         <div className="field full">
-          <label>Biyografi — Fransızca</label>
+          <label>Biographie</label>
           <textarea value={base.bio} onChange={function (e) { set('bio', e.target.value); }} />
-        </div>
-        <div className="field full">
-          <label>Biyografi — Türkçe</label>
-          <textarea value={base.bio_tr} onChange={function (e) { set('bio_tr', e.target.value); }} />
         </div>
       </div>
       <label className="checkbox-row">
         <input type="checkbox" checked={base.active} onChange={function (e) { set('active', e.target.checked); }} />
-        Müşterilere görünsün (aktif)
+        Visible pour les clients (actif)
       </label>
 
       <div>
-        <label style={{ fontWeight: 600, fontSize: '.9rem' }}>Verebileceği Hizmetler</label>
+        <label style={{ fontWeight: 600, fontSize: '.9rem' }}>Prestations proposées</label>
         <div className="chips" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
           {services.map(function (s) {
             return (
@@ -231,15 +223,15 @@ function StaffForm({ value, services, onSave, onCancel }) {
       </div>
 
       <div>
-        <label style={{ fontWeight: 600, fontSize: '.9rem' }}>Çalışma Saatleri</label>
+        <label style={{ fontWeight: 600, fontSize: '.9rem' }}>Horaires</label>
         <div style={{ marginTop: 8 }}>
           <HoursEditor hoursByDay={hoursByDay} onChange={setHoursByDay} />
         </div>
       </div>
 
       <div className="modal-actions">
-        <button type="button" className="btn btn-ghost" onClick={onCancel}>Vazgeç</button>
-        <button type="submit" className="btn btn-primary btn-block" disabled={busy}>{busy ? 'Kaydediliyor...' : 'Kaydet'}</button>
+        <button type="button" className="btn btn-ghost" onClick={onCancel}>Annuler</button>
+        <button type="submit" className="btn btn-primary btn-block" disabled={busy}>{busy ? 'Enregistrement...' : 'Enregistrer'}</button>
       </div>
     </form>
   );

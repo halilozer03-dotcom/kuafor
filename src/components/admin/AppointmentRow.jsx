@@ -2,7 +2,7 @@ import { fmtPrice } from '../../lib/money';
 import { fmtTime } from '../../lib/time';
 import { useSalon } from '../../context/SalonContext';
 
-const STATUS_LABEL = { confirmed: 'Onaylı', completed: 'Tamamlandı', cancelled: 'İptal', no_show: 'Gelmedi' };
+const STATUS_LABEL = { confirmed: 'Confirmé', completed: 'Terminé', cancelled: 'Annulé', no_show: 'Absent' };
 
 export default function AppointmentRow({ appt, onStatus }) {
   const { locAdmin, adminLocale, currency } = useSalon();
@@ -22,9 +22,9 @@ export default function AppointmentRow({ appt, onStatus }) {
       <span className={'badge ' + appt.status}>{STATUS_LABEL[appt.status] || appt.status}</span>
       {onStatus && appt.status === 'confirmed' && (
         <div className="appt-actions">
-          <button className="btn btn-ghost btn-sm" onClick={function () { onStatus(appt.id, 'completed'); }}>Tamamlandı</button>
-          <button className="btn btn-ghost btn-sm" onClick={function () { onStatus(appt.id, 'no_show'); }}>Gelmedi</button>
-          <button className="btn btn-danger btn-sm" onClick={function () { onStatus(appt.id, 'cancelled'); }}>İptal</button>
+          <button className="btn btn-ghost btn-sm" onClick={function () { onStatus(appt.id, 'completed'); }}>Terminé</button>
+          <button className="btn btn-ghost btn-sm" onClick={function () { onStatus(appt.id, 'no_show'); }}>Absent</button>
+          <button className="btn btn-danger btn-sm" onClick={function () { onStatus(appt.id, 'cancelled'); }}>Annuler</button>
         </div>
       )}
     </div>

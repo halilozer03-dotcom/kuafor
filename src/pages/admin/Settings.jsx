@@ -48,52 +48,40 @@ export default function Settings() {
   }
 
   if (err && !form) return <div className="err-banner">{err}</div>;
-  if (!form) return <p className="muted">Yükleniyor...</p>;
+  if (!form) return <p className="muted">Chargement...</p>;
 
   return (
     <div>
-      <div className="admin-header"><h1>Ayarlar</h1></div>
+      <div className="admin-header"><h1>Paramètres</h1></div>
 
       <form className="card" style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 640 }} onSubmit={handleSubmit}>
-        <p className="muted" style={{ fontSize: '.85rem', margin: 0 }}>
-          Fransızca alanlar müşterinin gördüğü metindir. Türkçe alanlar sitede dil TR seçildiğinde gösterilir.
-        </p>
-
         <div className="field">
-          <label>Salon Adı</label>
+          <label>Nom du salon</label>
           <input value={form.name || ''} onChange={function (e) { set('name', e.target.value); }} />
         </div>
 
         <div className="form-grid">
           <div className="field">
-            <label>Slogan — Fransızca</label>
+            <label>Slogan</label>
             <input value={form.slogan || ''} onChange={function (e) { set('slogan', e.target.value); }} placeholder="Avec ou sans rendez-vous" />
           </div>
-          <div className="field">
-            <label>Slogan — Türkçe</label>
-            <input value={form.slogan_tr || ''} onChange={function (e) { set('slogan_tr', e.target.value); }} placeholder="Randevulu veya randevusuz" />
-          </div>
           <div className="field full">
-            <label>Açıklama — Fransızca</label>
+            <label>Description</label>
             <textarea value={form.description || ''} onChange={function (e) { set('description', e.target.value); }} />
-          </div>
-          <div className="field full">
-            <label>Açıklama — Türkçe</label>
-            <textarea value={form.description_tr || ''} onChange={function (e) { set('description_tr', e.target.value); }} />
           </div>
         </div>
 
         <div className="form-grid">
           <div className="field">
-            <label>Adres</label>
+            <label>Adresse</label>
             <input value={form.address || ''} onChange={function (e) { set('address', e.target.value); }} />
           </div>
           <div className="field">
-            <label>Telefon</label>
+            <label>Téléphone</label>
             <input value={form.phone || ''} onChange={function (e) { set('phone', e.target.value); }} placeholder="07 58 37 79 86" />
           </div>
           <div className="field">
-            <label>E-posta</label>
+            <label>E-mail</label>
             <input value={form.email || ''} onChange={function (e) { set('email', e.target.value); }} />
           </div>
           <div className="field">
@@ -101,45 +89,41 @@ export default function Settings() {
             <input value={form.instagram || ''} onChange={function (e) { set('instagram', e.target.value); }} />
           </div>
           <div className="field">
-            <label>Çalışma Saatleri Notu — Fransızca</label>
+            <label>Note horaires d'ouverture</label>
             <input value={form.opening_hours_note || ''} onChange={function (e) { set('opening_hours_note', e.target.value); }} placeholder="Lundi - Samedi 09:00 - 19:00" />
-          </div>
-          <div className="field">
-            <label>Çalışma Saatleri Notu — Türkçe</label>
-            <input value={form.opening_hours_note_tr || ''} onChange={function (e) { set('opening_hours_note_tr', e.target.value); }} placeholder="Pazartesi - Cumartesi 09:00 - 19:00" />
           </div>
         </div>
 
         <div className="form-grid">
           <div className="field">
-            <label>Randevu Aralığı (dk)</label>
+            <label>Intervalle des créneaux (min)</label>
             <input type="number" min="5" step="5" value={form.slot_interval_minutes} onChange={function (e) { set('slot_interval_minutes', e.target.value); }} />
           </div>
           <div className="field">
-            <label>Min. Önceden Rezervasyon (dk)</label>
+            <label>Délai minimum avant réservation (min)</label>
             <input type="number" min="0" step="5" value={form.booking_lead_minutes} onChange={function (e) { set('booking_lead_minutes', e.target.value); }} />
           </div>
           <div className="field">
-            <label>Kaç Gün İleriye Randevu Alınabilir</label>
+            <label>Nombre de jours ouverts à la réservation</label>
             <input type="number" min="1" value={form.booking_horizon_days} onChange={function (e) { set('booking_horizon_days', e.target.value); }} />
           </div>
         </div>
 
         {err && <div className="err-banner">{err}</div>}
-        {saved && <div style={{ color: 'var(--ok)', fontWeight: 600, fontSize: '.9rem' }}>Kaydedildi.</div>}
-        <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? 'Kaydediliyor...' : 'Kaydet'}</button>
+        {saved && <div style={{ color: 'var(--ok)', fontWeight: 600, fontSize: '.9rem' }}>Enregistré.</div>}
+        <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? 'Enregistrement...' : 'Enregistrer'}</button>
       </form>
 
       <div className="card" style={{ maxWidth: 640, marginTop: 16 }}>
-        <h2 className="section-title" style={{ fontSize: '1rem', marginTop: 0 }}>Sistem</h2>
-        <div className="summary-row"><span>Saat dilimi</span><span>{form.timezone || '—'}</span></div>
-        <div className="summary-row"><span>Para birimi</span><span>{form.currency || '—'}</span></div>
+        <h2 className="section-title" style={{ fontSize: '1rem', marginTop: 0 }}>Système</h2>
+        <div className="summary-row"><span>Fuseau horaire</span><span>{form.timezone || '—'}</span></div>
+        <div className="summary-row"><span>Devise</span><span>{form.currency || '—'}</span></div>
         <div className="summary-row">
-          <span>Online randevu</span>
-          <span>{form.subscription_active === false ? 'Kapalı' : 'Açık'}</span>
+          <span>Réservation en ligne</span>
+          <span>{form.subscription_active === false ? 'Fermée' : 'Ouverte'}</span>
         </div>
         <p className="muted" style={{ fontSize: '.8rem', marginBottom: 0 }}>
-          Bu üç değer panelden değiştirilemez; sistem sağlayıcısı tarafından ayarlanır.
+          Ces trois valeurs ne sont pas modifiables depuis le panneau ; elles sont gérées par votre prestataire.
         </p>
       </div>
     </div>

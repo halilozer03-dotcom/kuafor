@@ -38,7 +38,7 @@ export default function App() {
 function ProtectedAdmin({ children }) {
   const { session, isAdmin, loading, signOut } = useAuth();
 
-  if (loading) return <div className="center-msg">Yükleniyor...</div>;
+  if (loading) return <div className="center-msg">Chargement...</div>;
   if (!session) return <Navigate to="/admin/giris" replace />;
   if (!isAdmin) return <PendingApproval email={session.email} onSignOut={signOut} />;
   return children;
@@ -49,12 +49,12 @@ function ProtectedAdmin({ children }) {
 function PendingApproval({ email, onSignOut }) {
   return (
     <div className="center-msg">
-      <h2>Hesabınız henüz yetkilendirilmedi</h2>
+      <h2>Votre compte n'est pas encore autorisé</h2>
       <p className="muted">
-        <strong>{email}</strong> hesabı oluşturuldu ama yönetici olarak işaretlenmedi.
-        Sistem sağlayıcınızın Firebase konsolundan bu hesabı yetkilendirmesi gerekiyor.
+        Le compte <strong>{email}</strong> a été créé mais n'est pas marqué comme administrateur.
+        Votre prestataire doit autoriser ce compte depuis la console Firebase.
       </p>
-      <button className="btn btn-ghost" onClick={onSignOut}>Çıkış Yap</button>
+      <button className="btn btn-ghost" onClick={onSignOut}>Déconnexion</button>
     </div>
   );
 }

@@ -68,18 +68,16 @@ export function SalonProvider({ children }) {
       return row[field] || '';
     }
 
-    // Panel her zaman Türkçedir (tek yönetici salon sahibi). Müşteri tarafındaki
-    // dil anahtarı panelin içeriğini çevirmemeli, yoksa siteyi FR'de kontrol eden
-    // sahip kendi panelini de okuyamaz hale gelir.
+    // Panel Fransızcadır (bu salonun sahibi Fransız, Türkçe bilmiyor). Müşteri
+    // tarafındaki dil anahtarı panelin içeriğini çevirmemeli — panel her zaman
+    // aynı (temel/kanonik) metni gösterir, müşterinin FR/TR seçimi onu etkilemez.
     function locAdmin(row, field) {
       if (!row) return '';
-      const tr = row[field + '_tr'];
-      if (tr !== null && tr !== undefined && String(tr).trim() !== '') return tr;
       return row[field] || '';
     }
 
     function tAdmin(key) {
-      const hit = DICT.tr[key];
+      const hit = DICT.fr[key];
       return hit !== undefined ? hit : key;
     }
 
@@ -90,7 +88,7 @@ export function SalonProvider({ children }) {
       loc,
       locAdmin,
       tAdmin,
-      adminLocale: LOCALES.tr,
+      adminLocale: LOCALES.fr,
       locale,
       currency: (settings && settings.currency) || 'EUR',
       settings,
