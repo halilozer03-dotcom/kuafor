@@ -8,6 +8,8 @@ const SHOTS = [
   { src: '/interior-1.jpg', w: 900, h: 497 },
   { src: '/interior-2.jpg', w: 900, h: 339 },
   { src: '/interior-3.jpg', w: 900, h: 339 },
+  // Gerçek cephe fotoğrafı: müşteri dükkânı sokaktan tanısın diye burada duruyor.
+  { src: '/storefront-800.jpg', w: 800, h: 400 },
 ];
 
 export default function SalonGallery() {

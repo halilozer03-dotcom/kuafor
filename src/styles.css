@@ -100,7 +100,7 @@ img { max-width: 100%; display: block; }
    633px yüksekliğe çıkıp tüm içeriği ekranın altına itiyordu. Aynı kolona hizalı. */
 .hero-banner { width: 100%; max-width: 720px; margin: 0 auto; background: var(--ink); }
 .hero-banner img {
-  width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; display: block;
+  width: 100%; height: auto; aspect-ratio: 738 / 558; object-fit: cover; display: block;
 }
 
 /* Hero */

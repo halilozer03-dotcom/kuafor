@@ -30,16 +30,16 @@ export default function Home() {
     <div className="app">
       <SiteHeader showBookButton={!locked} />
 
-      {/* KALIP NOTU: storefront-*.jpg salona özeldir (favicon.svg ile aynı kategoride).
-          Yeni salonda bu iki dosya değişir, kod değişmez. */}
+      {/* KALIP NOTU: hero.jpg salona özeldir (favicon.svg ile aynı kategoride).
+          Yeni salonda bu dosya değişir, kod değişmez.
+          Tek boyut: kaynak render 738px genişliğinden büyük değil, daha büyük
+          sürüm üretmek büyütme olur ve yumuşatırdı. */}
       <div className="hero-banner">
         <img
-          src="/storefront-1600.jpg"
-          srcSet="/storefront-800.jpg 800w, /storefront-1600.jpg 1600w"
-          sizes="(max-width: 720px) 100vw, 720px"
+          src="/hero.jpg"
           alt={t('home.bannerAlt') + (settings.name ? ' — ' + settings.name : '')}
-          width="1600"
-          height="800"
+          width="738"
+          height="558"
         />
       </div>
 
