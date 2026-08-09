@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { fetchSettings } from '../lib/api';
-import { configured } from '../lib/supabase';
+import { configured } from '../lib/firebase';
 import { DEFAULT_LANG, DICT, LANGS, LOCALES } from '../i18n/dict';
 
 const STORAGE_KEY = 'salon_lang';

@@ -1,0 +1,139 @@
+rules_version = '2';
+
+// Prestige Barber — Firestore güvenlik kuralları
+//
+// ÜCRETSIZ (Spark) planda Cloud Functions YOK. Dolayısıyla sunucu tarafı tüm
+// güvence BU DOSYADIR. İstemci kodu (tarayıcıdaki JavaScript) düzenlenebilir,
+// bu yüzden orada yapılan hiçbir kontrol güvenlik sayılmaz.
+//
+// Alan adları BİLEREK snake_case: Supabase sürümünden taşınan React bileşenleri
+// (appt.customer_name, s.duration_minutes, vb.) hiç değiştirilmeden çalışsın
+// diye veri modeli Postgres kolon adlarını birebir izliyor.
+//
+// Korunan üç şey:
+//  1) Müşteri kişisel verisi — randevu belgelerini yalnızca yönetici okur.
+//  2) Çift rezervasyon — kilit belgesinin ÜZERİNE yazılamaz (aşağıya bak).
+//  3) Abonelik/lisans kilidi — kapalıyken randevu oluşturulamaz ve bu alanı
+//     salon yöneticisi bile değiştiremez (yalnızca konsol/Admin SDK).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Yönetici = admins/{uid} belgesi VAR olan kullanıcı. Bu belgeler istemciden
+    // oluşturulamaz (aşağıda write kapalı); salon sahibinin hesabı açıldıktan
+    // sonra Firebase konsolundan elle eklenir.
+    //
+    // Supabase sürümünde "ilk giriş yapan otomatik yönetici olur" kuralı vardı;
+    // site yayına alındığında adresi bulan herkes salonu ele geçirebilirdi.
+    // Bilerek kaldırıldı.
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function settingsDoc() {
+      return get(/databases/$(database)/documents/settings/main).data;
+    }
+
+    function subscriptionActive() {
+      return settingsDoc().subscription_active == true;
+    }
+
+    function isNonEmptyString(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+
+    // --- Salon ayarları ---------------------------------------------------
+    match /settings/{docId} {
+      allow read: if true;
+      // subscription_active kasıtlı olarak DEĞİŞTİRİLEMEZ: salonun kendi lisans
+      // kilidini açmasını engeller. Değiştirmek için Firebase konsolu gerekir.
+      allow update: if isAdmin()
+                    && request.resource.data.subscription_active == resource.data.subscription_active;
+      allow create, delete: if false;
+    }
+
+    // --- Katalog ----------------------------------------------------------
+    // Herkese açık okuma: uygunluk hesabı istemcide yapılıyor, bu veriler
+    // zaten vitrinde/sitede yayınlanan bilgiler. Kişisel veri içermez.
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /staff/{staffId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /timeOff/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Çakışma kilitleri ------------------------------------------------
+    //
+    // Randevunun kapladığı her 5 dakikalık hücre için bir belge. Kimlik sabit:
+    // "{staff_id}_{YYYY-MM-DD}_{dakika}". Belge YOKSA yazma isteği "create",
+    // VARSA "update" sayılır (Firestore bunu istemcinin çağırdığı metottan
+    // değil, belgenin sunucudaki mevcut durumundan belirler). update kapalı
+    // olduğu için ikinci müşteri aynı hücreye yazamaz; toplu yazma atomik
+    // olduğundan tüm randevusu iptal olur. Postgres'teki EXCLUDE kısıtının
+    // yerini bu tutuyor.
+    //
+    // Kişisel veri İÇERMEZ (yalnızca personel + tarih + dakika), bu yüzden
+    // uygunluk hesabı için herkese açık okunabilir.
+    match /slotLocks/{lockId} {
+      allow read: if true;
+
+      allow create: if subscriptionActive()
+                    && request.resource.data.keys().hasOnly(['staff_id', 'date', 'minute', 'appointment_id'])
+                    && isNonEmptyString(request.resource.data.staff_id, 64)
+                    && request.resource.data.date is string
+                    && request.resource.data.minute is int
+                    && lockId == request.resource.data.staff_id + '_'
+                                 + request.resource.data.date + '_'
+                                 + string(request.resource.data.minute);
+
+      // ÜZERİNE YAZMA YASAK — çift rezervasyon korumasının tamamı buna bağlı.
+      allow update: if false;
+      // İptal edilen randevunun saatini geri açmak yalnızca yöneticinin işi.
+      allow delete: if isAdmin();
+    }
+
+    // --- Randevular -------------------------------------------------------
+    //
+    // Müşteri adı/telefonu/e-postası burada. Okuma YALNIZCA yönetici — site
+    // ziyaretçisi doluluk bilgisini slotLocks'tan öğrenir, buradan değil.
+    match /appointments/{id} {
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+
+      allow create: if subscriptionActive()
+                    && isNonEmptyString(request.resource.data.customer_name, 120)
+                    && isNonEmptyString(request.resource.data.customer_phone, 40)
+                    && request.resource.data.status == 'confirmed'
+                    && request.resource.data.appointment_date is string
+                    && request.resource.data.start_time is string
+                    && request.resource.data.end_time is string
+                    && exists(/databases/$(database)/documents/services/$(request.resource.data.service_id))
+                    && exists(/databases/$(database)/documents/staff/$(request.resource.data.staff_id));
+    }
+
+    // --- Yöneticiler ------------------------------------------------------
+    // Kullanıcı yalnızca kendi kaydını okuyabilir (giriş sonrası yetki kontrolü).
+    // Yazma tamamen kapalı: yönetici eklemek Firebase konsolundan yapılır.
+    match /admins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Tanımlanmamış her yol kapalı.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { configured } from './lib/supabase';
+import { configured } from './lib/firebase';
 import { useAuth } from './context/AuthContext';
 
 import Home from './pages/Home';
@@ -36,31 +36,25 @@ export default function App() {
 }
 
 function ProtectedAdmin({ children }) {
-  const { session, isAdmin, loading, claimAdmin } = useAuth();
+  const { session, isAdmin, loading, signOut } = useAuth();
 
   if (loading) return <div className="center-msg">Yükleniyor...</div>;
   if (!session) return <Navigate to="/admin/giris" replace />;
-  if (!isAdmin) return <PendingApproval onClaim={claimAdmin} />;
+  if (!isAdmin) return <PendingApproval email={session.email} onSignOut={signOut} />;
   return children;
 }
 
-function PendingApproval({ onClaim }) {
-  async function handleClaim() {
-    try {
-      const granted = await onClaim();
-      if (!granted) window.location.reload();
-    } catch (e) {
-      alert(e.message || String(e));
-    }
-  }
+// Hesap oluşturmak artık otomatik yetki VERMEZ (bkz. AuthContext.jsx).
+// Yöneticilik Firebase konsolundan (Firestore → admins/{uid}) elle açılır.
+function PendingApproval({ email, onSignOut }) {
   return (
     <div className="center-msg">
-      <h2>Hesabınız henüz onaylanmadı</h2>
+      <h2>Hesabınız henüz yetkilendirilmedi</h2>
       <p className="muted">
-        Bu salonun ilk yöneticisi değilseniz, mevcut bir yöneticinin sizi eklemesi gerekir.
-        Eğer ilk kurulumu yapıyorsanız aşağıdan yönetici olarak devam edebilirsiniz.
+        <strong>{email}</strong> hesabı oluşturuldu ama yönetici olarak işaretlenmedi.
+        Sistem sağlayıcınızın Firebase konsolundan bu hesabı yetkilendirmesi gerekiyor.
       </p>
-      <button className="btn btn-primary" onClick={handleClaim}>Yönetici olarak devam et</button>
+      <button className="btn btn-ghost" onClick={onSignOut}>Çıkış Yap</button>
     </div>
   );
 }
@@ -69,8 +63,7 @@ function SetupScreen() {
   return (
     <div className="center-msg setup">
       <h1>RANDEVU</h1>
-      <p><code>.env</code> boş. Supabase Settings → API'den al:</p>
-      <pre>{'VITE_SUPABASE_URL=https://XXX.supabase.co\nVITE_SUPABASE_ANON_KEY=eyJ...'}</pre>
+      <p>Firebase yapılandırması eksik: <code>src/lib/firebase.js</code>.</p>
     </div>
   );
 }

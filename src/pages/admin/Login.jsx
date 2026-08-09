@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AdminLogin() {
-  const { session, loading, signIn, signUp, claimAdmin } = useAuth();
+  const { session, loading, signIn, signUp } = useAuth();
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +22,6 @@ export default function AdminLogin() {
         await signIn(email, password);
       } else {
         await signUp(email, password);
-        await claimAdmin().catch(function () {});
       }
       navigate('/admin');
     } catch (e2) {
@@ -54,7 +53,7 @@ export default function AdminLogin() {
         </button>
         {mode === 'signup' && (
           <p className="muted" style={{ fontSize: '.8rem' }}>
-            İlk yönetici hesabı otomatik olarak yetkilendirilir. Daha sonra oluşturulan hesaplar mevcut yönetici tarafından onaylanmalıdır.
+            Hesap oluşturmak tek başına panele erişim vermez; sistem sağlayıcınızın hesabınızı yetkilendirmesi gerekir.
           </p>
         )}
       </form>

@@ -1,70 +1,67 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { configured, supabase } from '../lib/supabase';
+import {
+  createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut as fbSignOut,
+} from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
+// KALIP NOTU: Supabase sürümünde "salon_admins boşsa ilk giriş yapan otomatik
+// yönetici olur" kuralı vardı — kolay ilk kurulum için. Ama bu, site yayına
+// alındığında adresi bulan HERKESİN salonu ele geçirebileceği anlamına
+// geliyordu. Firestore sürümünde bilerek KALDIRILDI: yönetici olmak için
+// admins/{uid} belgesi Firebase konsolundan (veya Admin SDK'dan) elle
+// eklenmeli. Hesap oluşturmak artık otomatik yetki VERMEZ, yalnızca oturum açar.
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(configured);
+  const [loading, setLoading] = useState(true);
 
   useEffect(function () {
-    if (!configured) return undefined;
     let active = true;
 
-    async function bootstrap() {
-      const { data } = await supabase.auth.getSession();
-      if (!active) return;
-      setSession(data.session);
-      await refreshAdminStatus(data.session);
-      if (active) setLoading(false);
-    }
-
-    async function refreshAdminStatus(sess) {
-      if (!sess) {
+    async function refreshAdminStatus(u) {
+      if (!u) {
         setIsAdmin(false);
         return;
       }
-      const { data, error } = await supabase.from('salon_admins').select('user_id').eq('user_id', sess.user.id).maybeSingle();
-      if (!active) return;
-      setIsAdmin(!error && Boolean(data));
+      try {
+        const snap = await getDoc(doc(db, 'admins', u.uid));
+        if (active) setIsAdmin(snap.exists());
+      } catch (e) {
+        if (active) setIsAdmin(false);
+      }
     }
 
-    bootstrap();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(function (_event, sess) {
-      setSession(sess);
-      refreshAdminStatus(sess);
+    const unsub = onAuthStateChanged(auth, function (u) {
+      setUser(u);
+      refreshAdminStatus(u).finally(function () {
+        if (active) setLoading(false);
+      });
     });
 
     return function () {
       active = false;
-      sub.subscription.unsubscribe();
+      unsub();
     };
   }, []);
 
   async function signIn(email, password) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    await signInWithEmailAndPassword(auth, email, password);
   }
 
   async function signUp(email, password) {
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+    await createUserWithEmailAndPassword(auth, email, password);
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await fbSignOut(auth);
   }
 
-  async function claimAdmin() {
-    const { data, error } = await supabase.rpc('salon_bootstrap_admin');
-    if (error) throw error;
-    setIsAdmin(Boolean(data));
-    return Boolean(data);
-  }
-
-  const value = { session, isAdmin, loading, signIn, signUp, signOut, claimAdmin };
+  // session adı Supabase'den kalma; App.jsx bunu "oturum var mı" için
+  // kullanıyor, Firebase User nesnesiyle aynı işi görüyor.
+  const value = { session: user, isAdmin, loading, signIn, signUp, signOut };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
