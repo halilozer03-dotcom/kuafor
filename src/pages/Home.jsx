@@ -27,7 +27,10 @@ export default function Home() {
   const grouped = groupByCategory(services, loc, t);
 
   return (
-    <div className="app">
+    // has-cta-bar: aşağıdaki sabit CTA çubuğunun kapladığı yeri boşaltır.
+    // Bu sınıf olmadan sayfanın son bölümü (yol tarifi düğmesi) çubuğun
+    // altında kalıp tıklanamıyordu.
+    <div className={'app' + (locked ? '' : ' has-cta-bar')}>
       <SiteHeader showBookButton={!locked} />
 
       {/* KALIP NOTU: hero.jpg salona özeldir (favicon.svg ile aynı kategoride).
@@ -35,11 +38,15 @@ export default function Home() {
           Tek boyut: kaynak render 738px genişliğinden büyük değil, daha büyük
           sürüm üretmek büyütme olur ve yumuşatırdı. */}
       <div className="hero-banner">
+        {/* fetchpriority KÜÇÜK HARF: React 18 camelCase `fetchPriority`'yi
+            tanımıyor ve konsola uyarı basıp özelliği DOM'a hiç yazmıyor
+            (React 19 davranışı). Bu görsel sayfanın LCP öğesi. */}
         <img
           src="/hero.jpg"
           alt={t('home.bannerAlt') + (settings.name ? ' — ' + settings.name : '')}
           width="738"
           height="558"
+          fetchpriority="high"
         />
       </div>
 

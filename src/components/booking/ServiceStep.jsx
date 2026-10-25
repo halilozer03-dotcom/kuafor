@@ -40,6 +40,7 @@ export default function ServiceStep({ selected, onSelect }) {
                     key={s.id}
                     type="button"
                     className={'service-card selectable' + (selected && selected.id === s.id ? ' on' : '')}
+                    aria-pressed={Boolean(selected && selected.id === s.id)}
                     onClick={function () { onSelect(s); }}
                   >
                     <div className="service-card-main">

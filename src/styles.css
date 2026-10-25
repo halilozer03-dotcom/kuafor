@@ -11,7 +11,11 @@
   --ink: #121214;
   --ink-soft: #46454b;
   --charcoal: #404044;
-  --muted: #86858c;
+  /* Aynı soğuk gri ailesinin daha koyu basamağı. Önceki #86858c hem beyaz kart
+     (3.66:1) hem sayfa zemini (3.24:1) üzerinde WCAG AA'nın 4.5:1 eşiğinin
+     altındaydı; süre/ipucu/özet etiketlerinin hepsi bu renkte, güneşte telefonda
+     okunmuyordu. #6b6a71 → beyazda 5.35:1, zeminde 4.74:1. */
+  --muted: #6b6a71;
   --bg: #f1f1f2;
   --surface: #ffffff;
   --line: #e1e0e2;
@@ -67,18 +71,24 @@ img { max-width: 100%; display: block; }
 }
 .btn:active { transform: scale(.97); }
 .btn-primary { background: var(--ink); color: #fff; }
-.btn-primary:disabled { background: #c9bfc9; cursor: not-allowed; }
 .btn-accent { background: var(--accent); color: #fff; }
-.btn-accent:disabled { background: #d8bda3; cursor: not-allowed; }
+/* Pasif düğme rengi: eskiden #c9bfc9 (leylak) ve #d8bda3 (bej) idi — ikisi de
+   kaldırılan turuncu-gül paletinden kalmıştı. Randevu sihirbazı tam da bu
+   durumda açıldığı için ekrandaki ilk düğme monokrom markanın dışında bir
+   bej lekeydi. Nötr griye alındı. */
+.btn-primary:disabled, .btn-accent:disabled { background: #b9b8bd; color: #fff; cursor: not-allowed; }
 .btn-ghost { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
 .btn-danger { background: var(--warn-bg); color: var(--warn); }
 .btn-block { width: 100%; }
-.btn-sm { padding: 8px 14px; font-size: .85rem; }
+.btn-sm { padding: 9px 14px; min-height: 40px; font-size: .85rem; }
 .link-btn { color: var(--accent); font-weight: 600; }
 
 /* Top nav (public site) */
+/* Zemin rengi sayfanınkiyle (--bg #f1f1f2) aynı olmalı: eski rgba(250,246,241)
+   kaldırılan sıcak krem paletten kalmıştı ve sabit başlık her sayfada gövdeden
+   gözle görülür şekilde sarıya çalıyordu. */
 .site-header {
-  position: sticky; top: 0; z-index: 20; background: rgba(250, 246, 241, .92);
+  position: sticky; top: 0; z-index: 20; background: rgba(241, 241, 242, .92);
   backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
 }
 .site-header-inner {
@@ -176,7 +186,12 @@ img { max-width: 100%; display: block; }
 .staff-info p { font-size: .84rem; color: var(--muted); margin-top: 2px; }
 
 /* Booking wizard */
-.wizard { padding-bottom: 110px; }
+/* Sabit alt CTA çubuğunun kapladığı yeri boşaltan sınıf. Eskiden bu dolgu
+   `.wizard` üzerindeydi, ama sabit çubuğu ANA SAYFA da gösteriyor ve orada
+   `.wizard` yok — sonuç: ana sayfanın en altındaki "Itinéraire" düğmesi
+   tamamen çubuğun altında kalıyor, hiç tıklanamıyordu. Dolgu artık sınıfın
+   adının söylediği şeye, yani çubuğun varlığına bağlı. */
+.has-cta-bar { padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
 .stepper { display: flex; align-items: center; gap: 6px; padding: 16px 20px 4px; max-width: 720px; margin: 0 auto; }
 .step-dot { flex: 1; height: 4px; border-radius: 999px; background: var(--line); }
 .step-dot.done, .step-dot.active { background: var(--accent); }
@@ -185,7 +200,10 @@ img { max-width: 100%; display: block; }
 .step-head p { color: var(--muted); margin-top: 4px; }
 .step-body { padding: 12px 20px 8px; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
 
-.day-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 4px 20px 14px; scrollbar-width: none; }
+/* Yatay dolgu YOK: bu şerit `.step-body` içinde duruyor ve orası zaten 20px
+   veriyordu — ikisi toplanınca gün şeridi ve saat ızgarası sayfadaki diğer
+   her şeyden 20px içeride başlıyordu (ölçüldü: 40px'e karşı 20px). */
+.day-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 14px; scrollbar-width: none; }
 .day-scroll::-webkit-scrollbar { display: none; }
 .day-chip {
   flex: 0 0 auto; width: 56px; padding: 10px 0; border-radius: 14px; background: var(--surface);
@@ -195,13 +213,13 @@ img { max-width: 100%; display: block; }
 .day-chip .num { font-size: 1.05rem; font-family: var(--font-serif); }
 .day-chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
-.slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 20px; }
+.slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .slot-btn {
   padding: 12px 6px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--line);
   font-weight: 600; text-align: center;
 }
 .slot-btn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-.slot-empty { padding: 30px 20px; text-align: center; color: var(--muted); }
+.slot-empty { padding: 30px 0; text-align: center; color: var(--muted); }
 
 .summary-card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md);
@@ -218,10 +236,18 @@ img { max-width: 100%; display: block; }
 }
 .field input:focus, .field textarea:focus { border-color: var(--accent); }
 .field textarea { resize: vertical; min-height: 70px; font-family: inherit; }
+/* Zorunlu alanın boş kalması bir felaket değil, eksik girdidir: dolu kırmızı
+   kutu (.err-banner) yerine tek satır sakin uyarı. Kırmızı yalnızca gerçekten
+   başarısız olan işlem için (gönderim hatası) saklı. */
+.field-error { font-size: .8rem; font-weight: 600; color: var(--warn); }
+.field-error::before { content: '⚠ '; }
+.field input[aria-invalid='true'], .field textarea[aria-invalid='true'] { border-color: var(--warn); }
 
 .wizard-foot {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: linear-gradient(transparent, var(--bg) 30%);
-  padding: 22px 20px 18px;
+  /* viewport-fit=cover (index.html) nedeniyle iPhone'da alt çubuk ana ekran
+     çizgisinin altına iniyordu; safe-area kadar yukarı alınıyor. */
+  padding: 22px 20px calc(18px + env(safe-area-inset-bottom, 0px));
 }
 .wizard-foot-inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; }
 
@@ -267,6 +293,11 @@ img { max-width: 100%; display: block; }
 }
 .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
 .admin-header h1 { font-size: 1.5rem; }
+/* Başlığın hemen altındaki açıklama satırı. Başlığın alt boşluğunu bu satır
+   devralır — eskiden satır içi `marginTop: -4` ile yukarı çekiliyordu ve
+   altında hiç boşluk kalmadığı için listeye yapışıyordu. */
+.admin-header.tight { margin-bottom: 8px; }
+.admin-note { font-size: .85rem; color: var(--muted); margin-bottom: 20px; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
 .stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px 18px; }
@@ -312,10 +343,10 @@ img { max-width: 100%; display: block; }
 .entity-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .pill-toggle { display: inline-flex; padding: 3px 10px; border-radius: 999px; font-size: .74rem; font-weight: 700; }
 .pill-toggle.active { background: var(--ok-bg); color: var(--ok); }
-.pill-toggle.inactive { background: #ece6e0; color: var(--muted); }
+.pill-toggle.inactive { background: var(--accent-soft); color: var(--muted); }
 
 .modal-backdrop {
-  position: fixed; inset: 0; z-index: 40; background: rgba(20, 12, 20, .45); display: flex;
+  position: fixed; inset: 0; z-index: 40; background: rgba(18, 18, 20, .45); display: flex;
   align-items: flex-end; justify-content: center; padding: 0;
 }
 .modal {
@@ -338,6 +369,8 @@ img { max-width: 100%; display: block; }
 .login-shell {
   min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--ink);
 }
+/* Koyu zeminde varsayılan odak halkası (--accent #404044) görünmüyor. */
+.login-shell :focus-visible { outline-color: #f1f1f2; }
 .login-card {
   width: min(100%, 380px); background: var(--surface); border-radius: var(--radius-lg); padding: 30px 26px;
   display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow);
@@ -352,8 +385,9 @@ img { max-width: 100%; display: block; }
   display: inline-flex; border: 1px solid var(--line); border-radius: 999px;
   background: var(--surface); overflow: hidden;
 }
+/* 28.8px yükseklik ölçülmüştü — parmakla isabet ettirmek için fazla ince. */
 .lang-btn {
-  padding: 7px 11px; font-size: .78rem; font-weight: 700; color: var(--muted);
+  padding: 9px 12px; min-height: 40px; font-size: .78rem; font-weight: 700; color: var(--muted);
   letter-spacing: .02em; transition: background .15s ease, color .15s ease;
 }
 .lang-btn.on { background: var(--ink); color: #fff; }
@@ -384,13 +418,43 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 860px) {
   .admin-sidebar { display: none; }
+  /* Açık çekmece: eskiden bu JSX içinde satır içi stildi ve z-index 30 ile
+     üstteki çubuğu (z-index 20) tamamen örtüyordu — "Fermer" düğmesi ekranda
+     görünüyor ama çekmecenin ALTINDA kalıyordu, menü bir kez açılınca bir bağlantıya
+     basmadan kapatılamıyordu. Çekmecenin kendi kapatma düğmesi var artık. */
+  .admin-sidebar.open {
+    display: flex; position: fixed; inset: 0; z-index: 30; width: 100%; overflow-y: auto;
+  }
   .admin-mobile-bar { display: flex; }
   .admin-main { padding: 20px 16px 60px; }
   .form-grid { grid-template-columns: 1fr; }
+}
+.admin-drawer-close { display: none; }
+@media (max-width: 860px) {
+  .admin-sidebar.open .admin-drawer-close {
+    display: grid; place-items: center; margin-left: auto; width: 38px; height: 38px;
+    border-radius: 50%; background: rgba(255,255,255,.1); color: #fff; font-size: 1.2rem; flex-shrink: 0;
+  }
+}
+
+/* Müşteri tarafında sabit alt CTA çubuğu zaten her an ekranda; başlıktaki ikinci
+   "Prendre rendez-vous" hem gereksiz rekabet hem de dar ekranda 3 satıra sarıp
+   yapışkan başlığı 98px'e çıkarıyordu (320px'te ölçüldü). Mobilde gizli. */
+@media (max-width: 560px) {
+  .site-header .btn { display: none; }
 }
 
 @media (max-width: 420px) {
   .site-header-inner { gap: 8px; }
   .brand { font-size: 1rem; }
   .brand-mark { width: 32px; height: 32px; }
+}
+
+/* Hareket azaltma tercihi: dönüşüm için hiçbiri şart değil, tamamen kapatılır. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important; scroll-behavior: auto !important;
+  }
+  .btn:active { transform: none; }
 }

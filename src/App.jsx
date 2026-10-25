@@ -1,37 +1,44 @@
+import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { configured } from './lib/firebase';
 import { useAuth } from './context/AuthContext';
 
 import Home from './pages/Home';
 import Booking from './pages/Booking';
-import AdminLogin from './pages/admin/Login';
-import AdminLayout from './components/admin/AdminLayout';
-import Dashboard from './pages/admin/Dashboard';
-import Appointments from './pages/admin/Appointments';
-import Services from './pages/admin/Services';
-import Staff from './pages/admin/Staff';
-import Settings from './pages/admin/Settings';
+
+// Panel yalnızca salon sahibinin girdiği bir bölüm; müşterinin ilk açılışında
+// indirilmesi için hiçbir sebep yok. Statik import'ken beş panel sayfası da
+// müşteri paketine giriyordu. lazy() ile ayrı bir parçaya alındı.
+const AdminLogin = lazy(() => import('./pages/admin/Login'));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const Appointments = lazy(() => import('./pages/admin/Appointments'));
+const Services = lazy(() => import('./pages/admin/Services'));
+const Staff = lazy(() => import('./pages/admin/Staff'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
 
 export default function App() {
   if (!configured) return <SetupScreen />;
 
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      {/* Müşteri tarafı Fransızca olduğu için kanonik adres /rendez-vous.
-          /randevu-al eski bağlantılar bozulmasın diye yönlendirme olarak duruyor. */}
-      <Route path="/rendez-vous" element={<Booking />} />
-      <Route path="/randevu-al" element={<Navigate to="/rendez-vous" replace />} />
-      <Route path="/admin/giris" element={<AdminLogin />} />
-      <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
-        <Route index element={<Dashboard />} />
-        <Route path="randevular" element={<Appointments />} />
-        <Route path="hizmetler" element={<Services />} />
-        <Route path="personel" element={<Staff />} />
-        <Route path="ayarlar" element={<Settings />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<div className="center-msg">Chargement...</div>}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* Müşteri tarafı Fransızca olduğu için kanonik adres /rendez-vous.
+            /randevu-al eski bağlantılar bozulmasın diye yönlendirme olarak duruyor. */}
+        <Route path="/rendez-vous" element={<Booking />} />
+        <Route path="/randevu-al" element={<Navigate to="/rendez-vous" replace />} />
+        <Route path="/admin/giris" element={<AdminLogin />} />
+        <Route path="/admin" element={<ProtectedAdmin><AdminLayout /></ProtectedAdmin>}>
+          <Route index element={<Dashboard />} />
+          <Route path="randevular" element={<Appointments />} />
+          <Route path="hizmetler" element={<Services />} />
+          <Route path="personel" element={<Staff />} />
+          <Route path="ayarlar" element={<Settings />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 

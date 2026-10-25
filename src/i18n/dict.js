@@ -1,5 +1,6 @@
-// Müşteri tarafı sözlüğü. Panel (admin) Türkçe kalır: tek yönetici salon sahibidir
-// ve Fransızca bilmez, o yüzden panelin Fransızcası kimseye hizmet etmez.
+// Müşteri tarafı sözlüğü (FR/TR). Panel artık FRANSIZCA: bu salonun sahibi
+// Fransız ve Türkçe bilmiyor. Panel metinleri bileşenlerin içinde sabit,
+// buradaki fr tablosunu tAdmin() üzerinden ödünç alır (bkz. SalonContext).
 //
 // Kalıp notu: burada salona özel hiçbir metin olmamalı (salon adı, hizmet adı,
 // telefon...). Onlar veritabanından gelir. Burası yalnızca arayüz metinleri.

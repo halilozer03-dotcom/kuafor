@@ -27,6 +27,7 @@ export default function StaffStep({ serviceId, selectedId, onSelect, onAutoSkip 
         <button
           type="button"
           className={'staff-card' + (selectedId === null ? ' on' : '')}
+          aria-pressed={selectedId === null}
           onClick={function () { onSelect(null); }}
         >
           <span className="staff-avatar">?</span>
@@ -42,7 +43,8 @@ export default function StaffStep({ serviceId, selectedId, onSelect, onAutoSkip 
             key={s.id}
             type="button"
             className={'staff-card' + (selectedId === s.id ? ' on' : '')}
-            onClick={function () { onSelect(s.id, s.full_name); }}
+            aria-pressed={selectedId === s.id}
+            onClick={function () { onSelect(s.id); }}
           >
             <span className="staff-avatar">
               {s.avatar_url ? <img src={s.avatar_url} alt="" /> : s.full_name.charAt(0).toUpperCase()}

@@ -2,8 +2,8 @@ import { useSalon } from '../context/SalonContext';
 
 // Abonelik kapalıyken müşteriye gösterilen ekran. Bilerek sakin: müşterinin
 // hatası değil ve yapabileceği bir şey yok — telefonla ulaşabilsin yeter.
-// Asıl engel sunucuda (salon_get_available_slots / salon_book_appointment);
-// bu ekran yalnızca boş bir takvim yerine açıklama gösterir.
+// Asıl engel firestore.rules'ta ve availableSlots() içinde; bu ekran yalnızca
+// boş bir takvim yerine açıklama gösterir.
 export default function LockedNotice() {
   const { t, settings } = useSalon();
   const phone = settings && settings.phone;

@@ -94,7 +94,8 @@ export function SalonProvider({ children }) {
       settings,
       settingsErr,
       // Abonelik kapalıysa müşteri tarafı kilitlenir. Bu yalnızca görsel katman;
-      // gerçek engel salon_get_available_slots / salon_book_appointment içinde.
+      // gerçek engel firestore.rules'ta (settings/main.subscription_active
+      // istemciden değiştirilemez) ve slots.js/availableSlots içinde.
       locked: Boolean(settings) && settings.subscription_active === false,
     };
   }, [lang, settings, settingsErr]);

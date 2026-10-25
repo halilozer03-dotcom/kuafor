@@ -96,12 +96,12 @@ export default function Staff() {
 
   return (
     <div>
-      <div className="admin-header">
+      <div className="admin-header tight">
         <h1>Personnel</h1>
         <button className="btn btn-accent" onClick={openNew}>+ Nouveau membre</button>
       </div>
 
-      <p className="muted" style={{ fontSize: '.85rem', marginTop: -4 }}>
+      <p className="admin-note">
         « En pause » ferme uniquement aujourd'hui — ça se rouvre automatiquement demain. Pour fermer définitivement, passez en « Inactif ».
       </p>
 

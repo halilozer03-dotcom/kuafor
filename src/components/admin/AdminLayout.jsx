@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSalon } from '../../context/SalonContext';
@@ -18,6 +18,19 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Çekmece açıkken arkadaki sayfanın kaymaması ve ESC ile kapanması.
+  useEffect(function () {
+    if (!mobileOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    function onKey(e) { if (e.key === 'Escape') setMobileOpen(false); }
+    document.addEventListener('keydown', onKey);
+    return function () {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [mobileOpen]);
+
   async function handleSignOut() {
     await signOut();
     navigate('/admin/giris');
@@ -27,15 +40,24 @@ export default function AdminLayout() {
     <div className="admin-shell">
       <div className="admin-mobile-bar">
         <strong>Espace admin</strong>
-        <button className="btn btn-ghost btn-sm" style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,.3)' }} onClick={function () { setMobileOpen(!mobileOpen); }}>
-          {mobileOpen ? 'Fermer' : 'Menu'}
+        <button
+          className="btn btn-ghost btn-sm"
+          style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,.3)' }}
+          aria-expanded={mobileOpen}
+          onClick={function () { setMobileOpen(!mobileOpen); }}
+        >
+          Menu
         </button>
       </div>
 
-      <aside className="admin-sidebar" style={mobileOpen ? { display: 'flex', position: 'fixed', inset: 0, zIndex: 30, width: '100%' } : undefined}>
+      <aside className={'admin-sidebar' + (mobileOpen ? ' open' : '')}>
         <div className="admin-brand">
           <span className="admin-brand-mark"><BarberEmblem /></span>
           Espace admin
+          {/* Açık çekmece üstteki çubuğu örttüğü için kapatma düğmesi çekmecenin
+              KENDİ içinde olmak zorunda; yoksa menü bir bağlantıya basmadan
+              kapatılamıyor. */}
+          <button className="admin-drawer-close" aria-label="Fermer le menu" onClick={function () { setMobileOpen(false); }}>×</button>
         </div>
         {LINKS.map((l) => (
           <NavLink

@@ -16,7 +16,6 @@ export default function Booking() {
   const [step, setStep] = useState(0);
   const [service, setService] = useState(null);
   const [staffId, setStaffId] = useState(undefined);
-  const [staffName, setStaffName] = useState(null);
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(null);
   const [customer, setCustomer] = useState({ name: '', phone: '', email: '', notes: '' });
@@ -79,7 +78,7 @@ export default function Booking() {
   }
 
   return (
-    <div className="app wizard">
+    <div className="app has-cta-bar">
       <SiteHeader showBookButton={false} />
 
       <div className="stepper">
@@ -100,7 +99,6 @@ export default function Booking() {
             onSelect={function (s) {
               setService(s);
               setStaffId(undefined);
-              setStaffName(null);
               setSlot(null);
             }}
           />
@@ -110,14 +108,16 @@ export default function Booking() {
           <StaffStep
             serviceId={service.id}
             selectedId={staffId}
-            onSelect={function (id, name) {
+            // Personel adı ayrı bir state'te tutulmuyordu-tutuluyordu ama hiç
+            // okunmuyordu: özet ve onay ekranı adı seçilen slot'tan alıyor
+            // (slot.staff_name), çünkü "Farketmez" seçiminde ad ancak saat
+            // seçilince belli oluyor.
+            onSelect={function (id) {
               setStaffId(id);
-              setStaffName(name || null);
               setSlot(null);
             }}
             onAutoSkip={function (s) {
               setStaffId(s.id);
-              setStaffName(s.full_name);
               setStep(2);
             }}
           />

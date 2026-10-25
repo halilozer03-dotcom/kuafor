@@ -101,7 +101,21 @@ export async function fetchSlots(serviceId, date, staffId) {
     staffId: staffId || null,
   });
 
-  return rows.map((r) => ({ staff_id: r.staffId, staff_name: r.staffName, slot_time: r.slotTime }));
+  const mapped = rows.map((r) => ({ staff_id: r.staffId, staff_name: r.staffName, slot_time: r.slotTime }));
+
+  // "Farketmez" seçildiyse her saat BİR KEZ görünür. availableSlots her personel
+  // için ayrı satır üretiyor; iki berber de aynı saatte müsait olduğunda liste
+  // ikiye katlanıyordu (ölçüldü: 39 farklı saat için 74 düğme, mobilde 1720px'lik
+  // duvar) ve müşteri "farketmez" dedikten sonra tekrar berber seçmek zorunda
+  // kalıyordu. Sıralama personelin sort_order'ını koruduğu için ilk kayıt
+  // arayüzün vaat ettiği "premier barbier disponible" ile aynı kişidir.
+  if (staffId) return mapped;
+  const seen = new Set();
+  return mapped.filter((s) => {
+    if (seen.has(s.slot_time)) return false;
+    seen.add(s.slot_time);
+    return true;
+  });
 }
 
 // --- Randevu oluşturma -------------------------------------------------
